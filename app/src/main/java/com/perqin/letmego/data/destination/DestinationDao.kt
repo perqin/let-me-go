@@ -1,5 +1,6 @@
 package com.perqin.letmego.data.destination
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Query
 
@@ -9,5 +10,5 @@ import androidx.room.Query
 @Dao
 interface DestinationDao {
     @Query("SELECT * FROM destination")
-    fun getAllDestinations(): List<Destination>
+    fun getAllLiveDestinations(): LiveData<List<Destination>>
 }
