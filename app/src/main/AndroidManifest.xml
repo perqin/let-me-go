@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.perqin.letmego">
 
-    <!-- BEGIN: AMap SDK -->
+    <!-- BEGIN: AMap Map2D SDK -->
     <!--允许程序打开网络套接字-->
     <uses-permission android:name="android.permission.INTERNET" />
     <!--允许程序设置内置sd卡的写权限-->
@@ -16,7 +16,16 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <!--允许程序访问CellID或WiFi热点来获取粗略的位置-->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <!-- END: AMap SDK -->
+    <!-- END: AMap Map2D SDK -->
+
+    <!-- BEGIN: AMap Location SDK -->
+    <!--用于访问GPS定位-->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!--用于获取wifi的获取权限，wifi信息会用来进行网络定位-->
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <!--用于申请调用A-GPS模块-->
+    <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
+    <!-- END: AMap Location SDK -->
 
     <application
         android:name=".App"
@@ -27,11 +36,14 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
-        <!-- BEGIN: AMap SDK -->
+        <!-- BEGIN: AMap Map2D SDK -->
         <meta-data
             android:name="com.amap.api.v2.apikey"
             android:value="a4323d796749f119c2ee898dcb816e28" />
-        <!-- END: AMap SDK -->
+        <!-- END: AMap Map2D SDK -->
+        <!-- START: AMap Location SDK -->
+        <service android:name="com.amap.api.location.APSService" />
+        <!-- END: AMap Location SDK -->
         <activity
             android:name=".pages.main.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">

@@ -20,4 +20,5 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
-# TODO: AMap SDK: https://lbs.amap.com/api/android-sdk/guide/create-project/dev-attention#obfuscated-code
+# TODO: AMap Map SDK: https://lbs.amap.com/api/android-sdk/guide/create-project/dev-attention#obfuscated-code
+# TODO: AMap Location SDK: https://lbs.amap.com/api/android-location-sdk/guide/create-project/dev-attention#obfuscated-code
