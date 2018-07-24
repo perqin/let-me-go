@@ -42,7 +42,7 @@
             android:value="a4323d796749f119c2ee898dcb816e28" />
         <!-- END: AMap Map2D SDK -->
         <!-- START: AMap Location SDK -->
-        <service android:name="com.amap.api.location.APSService" />
+        <!--<service android:name="com.amap.api.location.APSService" />-->
         <!-- END: AMap Location SDK -->
         <activity
             android:name=".pages.main.MainActivity"
