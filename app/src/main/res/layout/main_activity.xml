@@ -28,7 +28,10 @@
         android:id="@+id/placeDetailConstraintLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom">
+        android:layout_gravity="bottom"
+        android:background="@android:color/background_light"
+        android:visibility="gone"
+        tools:visibility="visible">
 
         <TextView
             style="@style/TextAppearance.AppCompat.Title"

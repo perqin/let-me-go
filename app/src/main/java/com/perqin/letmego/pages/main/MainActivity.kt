@@ -37,13 +37,19 @@ class MainActivity : AppCompatActivity() {
     private fun showDetail(title: String) {
         placeTitleTextView.text = title
         placeDetailConstraintLayout.visibility = View.VISIBLE
-        ObjectAnimator.ofFloat(placeDetailConstraintLayout, "translationY", 0F).start()
+        ObjectAnimator
+                .ofFloat(placeDetailConstraintLayout, "translationY", 0F)
+                .apply {
+                    duration = 500
+                }
+                .start()
     }
 
     private fun hideDetail() {
         ObjectAnimator
                 .ofFloat(placeDetailConstraintLayout, "translationY", placeDetailConstraintLayout.height.toFloat())
                 .apply {
+                    duration = 500
                     addListener(object : AnimatorListenerAdapter() {
                         override fun onAnimationEnd(animation: Animator?) {
                             placeDetailConstraintLayout.visibility = View.GONE

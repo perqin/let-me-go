@@ -9,6 +9,9 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.amap.api.maps2d.AMap
 import com.amap.api.maps2d.MapView
+import com.amap.api.maps2d.model.LatLng
+import com.amap.api.maps2d.model.Marker
+import com.amap.api.maps2d.model.MarkerOptions
 import com.amap.api.maps2d.model.MyLocationStyle
 import com.perqin.letmego.R
 
@@ -17,6 +20,7 @@ class MainFragment : Fragment() {
     private lateinit var activityViewModel: MainActivityViewModel
     private lateinit var viewModel: MainViewModel
     private lateinit var mapView: MapView
+    private var defaultMarker: Marker? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -50,6 +54,11 @@ class MainFragment : Fragment() {
 
         activityViewModel = ViewModelProviders.of(activity!!).get(MainActivityViewModel::class.java)
         activityViewModel.selectedPlace.observe(this, Observer {
+            if (it != null) {
+                showDefaultMarker(it.latLng)
+            } else {
+                hideDefaultMarker()
+            }
         })
 
         viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
@@ -74,6 +83,21 @@ class MainFragment : Fragment() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         mapView.onSaveInstanceState(outState)
+    }
+
+    private fun showDefaultMarker(latLng: LatLng) {
+        if (defaultMarker == null) {
+            defaultMarker = aMap.addMarker(MarkerOptions().apply {
+                position(latLng)
+            })
+        } else {
+            defaultMarker!!.position = latLng
+        }
+    }
+
+    private fun hideDefaultMarker() {
+        defaultMarker?.remove()
+        defaultMarker = null
     }
 
     companion object {

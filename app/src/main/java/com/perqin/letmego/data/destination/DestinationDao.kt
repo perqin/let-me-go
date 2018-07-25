@@ -6,6 +6,7 @@ import androidx.room.Query
 
 /**
  * Created by perqinxie on 2018/07/20.
+ * TODO: Rename to FavoriteDestinationDao
  */
 @Dao
 interface DestinationDao {
