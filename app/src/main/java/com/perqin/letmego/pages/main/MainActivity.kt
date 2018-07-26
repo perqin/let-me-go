@@ -27,6 +27,10 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+        notifyImageButton.setOnClickListener {
+            viewModel.toggleEnableNotificationForSelectedPlace()
+        }
+
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
                     .replace(R.id.container, MainFragment.newInstance())

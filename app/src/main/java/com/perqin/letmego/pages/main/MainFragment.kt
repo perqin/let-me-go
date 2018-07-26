@@ -41,10 +41,6 @@ class MainFragment : Fragment() {
 
         mapView.onCreate(savedInstanceState)
         aMap = mapView.map
-        aMap.setMyLocationStyle(MyLocationStyle().apply {
-            myLocationType(MyLocationStyle.LOCATION_TYPE_FOLLOW)
-        })
-        aMap.isMyLocationEnabled = true
         aMap.setOnMapClickListener {
             activityViewModel.deselectPlace()
         }
@@ -53,6 +49,13 @@ class MainFragment : Fragment() {
         }
 
         activityViewModel = ViewModelProviders.of(activity!!).get(MainActivityViewModel::class.java)
+        activityViewModel.locationSource.observe(this, Observer {
+            aMap.setLocationSource(it)
+            aMap.setMyLocationStyle(MyLocationStyle().apply {
+                myLocationType(MyLocationStyle.LOCATION_TYPE_FOLLOW)
+            })
+            aMap.isMyLocationEnabled = true
+        })
         activityViewModel.selectedPlace.observe(this, Observer {
             if (it != null) {
                 showDefaultMarker(it.latLng)
