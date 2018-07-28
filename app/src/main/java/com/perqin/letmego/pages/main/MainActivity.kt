@@ -3,9 +3,11 @@ package com.perqin.letmego.pages.main
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.perqin.letmego.R
@@ -26,6 +28,40 @@ class MainActivity : AppCompatActivity() {
                 hideDetail()
             }
         })
+        viewModel.mapCameraMode.observe(this, Observer {
+            when (it!!) {
+                MainActivityViewModel.MapCameraMode.FREE -> {
+                    mapCameraModeFab.setImageResource(R.drawable.ic_my_location_black_24dp)
+                    mapCameraModeFab.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.tint_inactivate))
+                }
+                MainActivityViewModel.MapCameraMode.CENTER_MY_LOCATION -> {
+                    mapCameraModeFab.setImageResource(R.drawable.ic_my_location_black_24dp)
+                    mapCameraModeFab.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.tint_activate))
+                }
+                MainActivityViewModel.MapCameraMode.CENTER_TERMINALS -> {
+                    mapCameraModeFab.setImageResource(R.drawable.ic_center_focus_strong_black_24dp)
+                    mapCameraModeFab.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.tint_activate))
+                }
+            }
+        })
+        viewModel.enableNotificationForSelectedPlace.observe(this, Observer {
+            notifyImageButton.setImageResource(
+                    if (it)
+                        R.drawable.ic_notifications_active_black_24dp
+                    else
+                        R.drawable.ic_notifications_none_black_24dp
+            )
+            notifyImageButton.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this,
+                    if (it)
+                        R.color.colorPrimary
+                    else
+                        R.color.black
+            ))
+        })
+
+        mapCameraModeFab.setOnClickListener {
+            viewModel.rotateMapCameraMode()
+        }
 
         notifyImageButton.setOnClickListener {
             viewModel.toggleEnableNotificationForSelectedPlace()
