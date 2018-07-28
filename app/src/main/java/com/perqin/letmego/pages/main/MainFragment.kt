@@ -10,9 +10,11 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.perqin.letmego.R
 import com.perqin.letmego.data.place.Place
+import com.perqin.letmego.utils.TencentMapGestureAdapter
 import com.tencent.tencentmap.mapsdk.maps.CameraUpdateFactory
 import com.tencent.tencentmap.mapsdk.maps.SupportMapFragment
 import com.tencent.tencentmap.mapsdk.maps.TencentMap
+import com.tencent.tencentmap.mapsdk.maps.TencentMapOptions
 import com.tencent.tencentmap.mapsdk.maps.model.*
 
 class MainFragment : Fragment() {
@@ -24,6 +26,7 @@ class MainFragment : Fragment() {
     private var destinationRangeCircle: Circle? = null
     private var selectedPlaceMarker: Marker? = null
     private var mapCameraMode = MainActivityViewModel.MapCameraMode.FREE
+    private var lockMapCamera: Boolean = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -37,12 +40,51 @@ class MainFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
         tencentMap = (childFragmentManager.findFragmentById(R.id.mapFragment) as SupportMapFragment).map
+        tencentMap.uiSettings.apply {
+            setLogoPosition(TencentMapOptions.LOGO_POSITION_BOTTOM_LEFT)
+        }
         tencentMap.setOnMapClickListener {
             activityViewModel.deselectPlace()
         }
         tencentMap.setOnMapLongClickListener {
             activityViewModel.selectPlace(it.latitude, it.longitude)
         }
+        tencentMap.addTencentMapGestureListener(object : TencentMapGestureAdapter() {
+            override fun onDown(p0: Float, p1: Float): Boolean {
+                lockMapCamera = true
+                return false
+            }
+
+            override fun onUp(p0: Float, p1: Float): Boolean {
+                lockMapCamera = false
+                return false
+            }
+
+            override fun onDoubleTap(p0: Float, p1: Float): Boolean {
+                activityViewModel.freeMapCamera()
+                return false
+            }
+
+            override fun onFling(p0: Float, p1: Float): Boolean {
+                activityViewModel.freeMapCamera()
+                return false
+            }
+
+            override fun onLongPress(p0: Float, p1: Float): Boolean {
+                activityViewModel.freeMapCamera()
+                return false
+            }
+
+            override fun onScroll(p0: Float, p1: Float): Boolean {
+                activityViewModel.freeMapCamera()
+                return false
+            }
+
+            override fun onSingleTap(p0: Float, p1: Float): Boolean {
+                activityViewModel.freeMapCamera()
+                return false
+            }
+        })
 
         @Suppress("DEPRECATION")
         myLocationMarker = tencentMap.addMarker(MarkerOptions())
@@ -69,23 +111,25 @@ class MainFragment : Fragment() {
             }
         })
         activityViewModel.mapCameraTargets.observe(this, Observer { targets ->
-            val padding = context!!.resources.getDimensionPixelSize(R.dimen.map_camera_padding)
-            if (targets.size == 1) {
-                // Center it
-                tencentMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                        LatLng(targets[0].latitude, targets[0].longitude),
-                        15.0F
-                ))
-            } else if (targets.size > 1) {
-                // Zoom to include all places
-                tencentMap.animateCamera(CameraUpdateFactory.newLatLngBoundsRect(
-                        LatLngBounds.builder().apply {
-                            targets.forEach {
-                                include(LatLng(it.latitude, it.longitude))
-                            }
-                        }.build(),
-                        padding, padding, padding, padding
-                ))
+            if (!lockMapCamera) {
+                val padding = context!!.resources.getDimensionPixelSize(R.dimen.map_camera_padding)
+                if (targets.size == 1) {
+                    // Center it
+                    tencentMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                            LatLng(targets[0].latitude, targets[0].longitude),
+                            15.0F
+                    ))
+                } else if (targets.size > 1) {
+                    // Zoom to include all places
+                    tencentMap.animateCamera(CameraUpdateFactory.newLatLngBoundsRect(
+                            LatLngBounds.builder().apply {
+                                targets.forEach {
+                                    include(LatLng(it.latitude, it.longitude))
+                                }
+                            }.build(),
+                            padding, padding, padding, padding
+                    ))
+                }
             }
         })
 

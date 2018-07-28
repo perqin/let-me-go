@@ -32,19 +32,18 @@ class MainActivityViewModel : ViewModel() {
         _enableNotificationForSelectedPlace.value = false
         _mapCameraMode.value = MapCameraMode.CENTER_MY_LOCATION
         _mapCameraTargets.value = emptyList()
-        myLocation.observeForever {
-            updateMapCamera()
-        }
+        myLocation.observeForever { updateMapCameraTargets() }
+        _destination.observeForever { updateMapCameraTargets() }
+        _selectedPlace.observeForever { updateMapCameraTargets() }
+        _mapCameraMode.observeForever { updateMapCameraTargets() }
     }
 
     fun deselectPlace() {
         _selectedPlace.value = null
-        updateMapCamera()
     }
 
     fun selectPlace(latitude: Double, longitude: Double) {
         _selectedPlace.value = Place(latitude, longitude)
-        updateMapCamera()
     }
 
     fun toggleEnableNotificationForSelectedPlace() {
@@ -58,7 +57,6 @@ class MainActivityViewModel : ViewModel() {
                 disableNotification()
             }
         }
-        updateMapCamera()
     }
 
     fun activityCreate() {
@@ -80,7 +78,6 @@ class MainActivityViewModel : ViewModel() {
                     MapCameraMode.FREE
             MapCameraMode.CENTER_TERMINALS -> MapCameraMode.FREE
         }
-        updateMapCamera()
     }
 
     private fun enableNotification() {
@@ -92,7 +89,7 @@ class MainActivityViewModel : ViewModel() {
         PlaceNotifier.disableNotification()
     }
 
-    private fun updateMapCamera() {
+    private fun updateMapCameraTargets() {
         val mode = _mapCameraMode.value?: MapCameraMode.FREE
         val myLocation = this.myLocation.value
         val selectedPlace = this.selectedPlace.value
@@ -104,6 +101,12 @@ class MainActivityViewModel : ViewModel() {
             }
         } else {
             emptyList()
+        }
+    }
+
+    fun freeMapCamera() {
+        if (_mapCameraMode.value != MapCameraMode.FREE) {
+            _mapCameraMode.value = MapCameraMode.FREE
         }
     }
 
