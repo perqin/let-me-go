@@ -1,22 +1,20 @@
 package com.perqin.letmego.data.place
 
-import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.location.Location
 import android.os.Vibrator
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.amap.api.location.AMapLocationClient
-import com.amap.api.maps2d.AMapUtils
-import com.amap.api.maps2d.LocationSource
-import com.amap.api.maps2d.model.LatLng
+import androidx.lifecycle.Observer
 import com.perqin.letmego.App
 import com.perqin.letmego.CHANNEL_ALERT
 import com.perqin.letmego.R
+import com.perqin.letmego.data.location.TencentLocator
+import com.tencent.map.geolocation.TencentLocation
+import com.tencent.map.geolocation.TencentLocationUtils
 
 /**
  * @author perqin
@@ -25,19 +23,20 @@ object PlaceNotifier {
     private const val REQUEST_CODE_IGNORE_NOTIFICATION = 233
     private const val ACTION_IGNORE_NOTIFICATION = "com.perqin.letmego.ACTION_IGNORE_NOTIFICATION"
 
+    private val myLocation = TencentLocator.getLocation()
+
+    private val myLocationObserver = Observer<TencentLocation> {
+        checkNotification(it.latitude, it.longitude)
+    }
+
     private val ignoreNotificationReceiver = object : BroadcastReceiver() {
-        override fun onReceive(p0: Context?, p1: Intent) {
-            if (p1.action == ACTION_IGNORE_NOTIFICATION) {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == ACTION_IGNORE_NOTIFICATION) {
                 stopVibration()
                 notificationStatus = 2
             }
         }
     }
-
-    @SuppressLint("StaticFieldLeak")
-    private var locationClient: AMapLocationClient? = null
-
-    private var onLocationChangedListener: LocationSource.OnLocationChangedListener? = null
 
     private var destination: Place? = null
 
@@ -47,20 +46,6 @@ object PlaceNotifier {
      * 2: Ignored (user've noticed the notification)
      */
     private var notificationStatus = 0
-
-    val locationSource = object : LocationSource {
-        override fun activate(listener: LocationSource.OnLocationChangedListener) {
-            onLocationChangedListener = listener
-        }
-
-        override fun deactivate() {
-            onLocationChangedListener = null
-        }
-    }
-        get() {
-            ensureLocation()
-            return field
-        }
 
     fun enableNotificationForPlace(place: Place) {
         destination = place
@@ -73,30 +58,23 @@ object PlaceNotifier {
         App.context.unregisterReceiver(ignoreNotificationReceiver)
     }
 
+    fun startup() {
+        ensureLocation()
+    }
+
     fun shutdown() {
-        locationClient?.run {
-            stopLocation()
-            onDestroy()
-        }
-        locationClient = null
+        myLocation.removeObserver(myLocationObserver)
+        TencentLocator.disable()
     }
 
     private fun ensureLocation() {
-        if (locationClient == null) {
-            locationClient = AMapLocationClient(App.context).apply {
-                setLocationListener {
-                    println("PERQIN: ${it.latitude}, ${it.longitude} ${it.errorCode}, ${it.errorInfo}")
-                    onLocationChangedListener?.onLocationChanged(it)
-                    checkNotification(it)
-                }
-                startLocation()
-            }
-        }
+        TencentLocator.enable()
+        myLocation.observeForever(myLocationObserver)
     }
 
-    private fun checkNotification(location: Location) {
+    private fun checkNotification(latitude: Double, longitude: Double) {
         if (destination != null) {
-            val distance = AMapUtils.calculateLineDistance(destination!!.latLng, LatLng(location.latitude, location.longitude))
+            val distance = TencentLocationUtils.distanceBetween(latitude, longitude, destination!!.latitude, destination!!.longitude)
             if (distance <= 500) {
                 sendAboutToArriveNotification()
             }

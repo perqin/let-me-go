@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity() {
         viewModel = ViewModelProviders.of(this).get(MainActivityViewModel::class.java)
         viewModel.selectedPlace.observe(this, Observer {
             if (it != null) {
-                showDetail("(${it.latLng.latitude}, ${it.latLng.longitude})")
+                showDetail("(${it.latitude}, ${it.longitude})")
             } else {
                 hideDetail()
             }
@@ -36,6 +36,13 @@ class MainActivity : AppCompatActivity() {
                     .replace(R.id.container, MainFragment.newInstance())
                     .commitNow()
         }
+
+        viewModel.activityCreate()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.activityDestroy()
     }
 
     private fun showDetail(title: String) {

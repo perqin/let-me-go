@@ -5,29 +5,29 @@
 
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <!-- BEGIN: AMap Map2D SDK -->
-    <!--允许程序打开网络套接字-->
+    <!-- BEGIN: Tencent LBS Map3D SDK -->
+    <!--访问网络获取地图服务-->
     <uses-permission android:name="android.permission.INTERNET" />
-    <!--允许程序设置内置sd卡的写权限-->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <!--允许程序获取网络状态-->
+    <!--检查网络可用性-->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <!--允许程序访问WiFi网络信息-->
+    <!-- 访问WiFi状态 -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <!--允许程序读写手机状态和身份-->
+    <!--需要外部存储写权限用于保存地图缓存-->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!--获取 device id 辨别设备-->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <!--允许程序访问CellID或WiFi热点来获取粗略的位置-->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <!-- END: AMap Map2D SDK -->
+    <!-- END: Tencent LBS Map3D SDK -->
 
-    <!-- BEGIN: AMap Location SDK -->
-    <!--用于访问GPS定位-->
+    <!-- BEGIN: Tencent LBS Location SDK extra permissions -->
+    <!-- 通过GPS得到精确位置 -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <!--用于获取wifi的获取权限，wifi信息会用来进行网络定位-->
+    <!-- 通过网络得到粗略位置 -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- 修改WiFi状态，发起WiFi扫描, 需要WiFi信息用于网络定位 -->
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <!--用于申请调用A-GPS模块-->
-    <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
-    <!-- END: AMap Location SDK -->
+    <!-- 访问网络的变化, 需要某些信息用于网络定位 -->
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <!-- END: Tencent LBS Location SDK extra permissions -->
 
     <application
         android:name=".App"
@@ -38,14 +38,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
-        <!-- BEGIN: AMap Map2D SDK -->
+        <!-- BEGIN: Tencent LBS SDK -->
         <meta-data
-            android:name="com.amap.api.v2.apikey"
-            android:value="a4323d796749f119c2ee898dcb816e28" />
-        <!-- END: AMap Map2D SDK -->
-        <!-- START: AMap Location SDK -->
-        <service android:name="com.amap.api.location.APSService" />
-        <!-- END: AMap Location SDK -->
+            android:name="TencentMapSDK"
+            android:value="LEJBZ-4RB6W-DPPRV-R65FD-SBNJZ-E6BBH"/>
+        <!-- END: Tencent LBS SDK -->
         <activity
             android:name=".pages.main.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">

@@ -7,8 +7,9 @@
     android:layout_height="match_parent"
     tools:context="com.perqin.letmego.pages.main.MainFragment">
 
-    <com.amap.api.maps2d.MapView
-        android:id="@+id/mapView"
+    <fragment
+        class="com.tencent.tencentmap.mapsdk.maps.SupportMapFragment"
+        android:id="@+id/mapFragment"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"

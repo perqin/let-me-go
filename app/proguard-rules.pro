@@ -20,5 +20,5 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
-# TODO: AMap Map SDK: https://lbs.amap.com/api/android-sdk/guide/create-project/dev-attention#obfuscated-code
-# TODO: AMap Location SDK: https://lbs.amap.com/api/android-location-sdk/guide/create-project/dev-attention#obfuscated-code
+# TODO: Tencent LBS Map3D SDK: http://lbs.qq.com/android_v1/guide-project-setup.html
+# TODO: Tencent LBS Location SDK: http://lbs.qq.com/geo/guide-install.html

@@ -7,30 +7,24 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.amap.api.maps2d.AMap
-import com.amap.api.maps2d.MapView
-import com.amap.api.maps2d.model.LatLng
-import com.amap.api.maps2d.model.Marker
-import com.amap.api.maps2d.model.MarkerOptions
-import com.amap.api.maps2d.model.MyLocationStyle
 import com.perqin.letmego.R
+import com.perqin.letmego.data.place.Place
+import com.tencent.tencentmap.mapsdk.maps.SupportMapFragment
+import com.tencent.tencentmap.mapsdk.maps.TencentMap
+import com.tencent.tencentmap.mapsdk.maps.model.LatLng
+import com.tencent.tencentmap.mapsdk.maps.model.Marker
+import com.tencent.tencentmap.mapsdk.maps.model.MarkerOptions
 
 class MainFragment : Fragment() {
-    private lateinit var aMap: AMap
+    private lateinit var tencentMap: TencentMap
+    private lateinit var myLocationMarker: Marker
     private lateinit var activityViewModel: MainActivityViewModel
-    private lateinit var viewModel: MainViewModel
-    private lateinit var mapView: MapView
+    private lateinit var viewModel: MainFragmentViewModel
     private var defaultMarker: Marker? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.main_fragment, container, false)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        // Must get it explicitly, because Kotlin extension is not accessible in onDestroy
-        mapView = view.findViewById(R.id.mapView)
     }
 
     /**
@@ -39,60 +33,36 @@ class MainFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        mapView.onCreate(savedInstanceState)
-        aMap = mapView.map
-        aMap.setOnMapClickListener {
+        tencentMap = (childFragmentManager.findFragmentById(R.id.mapFragment) as SupportMapFragment).map
+        tencentMap.setOnMapClickListener {
             activityViewModel.deselectPlace()
         }
-        aMap.setOnMapLongClickListener {
-            activityViewModel.selectPlace(it)
+        tencentMap.setOnMapLongClickListener {
+            activityViewModel.selectPlace(it.latitude, it.longitude)
         }
 
+        @Suppress("DEPRECATION")
+        myLocationMarker = tencentMap.addMarker(MarkerOptions())
+
         activityViewModel = ViewModelProviders.of(activity!!).get(MainActivityViewModel::class.java)
-        activityViewModel.locationSource.observe(this, Observer {
-            aMap.setLocationSource(it)
-            aMap.setMyLocationStyle(MyLocationStyle().apply {
-                myLocationType(MyLocationStyle.LOCATION_TYPE_FOLLOW)
-            })
-            aMap.isMyLocationEnabled = true
-        })
         activityViewModel.selectedPlace.observe(this, Observer {
             if (it != null) {
-                showDefaultMarker(it.latLng)
+                showDefaultMarker(it)
             } else {
                 hideDefaultMarker()
             }
         })
 
-        viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
-        // TODO: Use the ViewModel
+        viewModel = ViewModelProviders.of(this).get(MainFragmentViewModel::class.java)
+        viewModel.myLocation.observe(this, Observer {
+            myLocationMarker.position = LatLng(it.latitude, it.longitude)
+        })
     }
 
-    override fun onResume() {
-        super.onResume()
-        mapView.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        mapView.onPause()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        mapView.onDestroy()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        mapView.onSaveInstanceState(outState)
-    }
-
-    private fun showDefaultMarker(latLng: LatLng) {
+    private fun showDefaultMarker(place: Place) {
+        val latLng = LatLng(place.latitude, place.longitude)
         if (defaultMarker == null) {
-            defaultMarker = aMap.addMarker(MarkerOptions().apply {
-                position(latLng)
-            })
+            defaultMarker = tencentMap.addMarker(MarkerOptions(latLng))
         } else {
             defaultMarker!!.position = latLng
         }
