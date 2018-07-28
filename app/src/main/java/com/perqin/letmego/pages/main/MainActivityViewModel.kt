@@ -13,6 +13,9 @@ class MainActivityViewModel : ViewModel() {
         Place(it.latitude, it.longitude)
     }
 
+    private val _destination = MutableLiveData<Place?>()
+    val destination: LiveData<Place?> = _destination
+
     private val _selectedPlace = MutableLiveData<Place?>()
     val selectedPlace: LiveData<Place?> = _selectedPlace
 
@@ -49,9 +52,10 @@ class MainActivityViewModel : ViewModel() {
             val enable = !_enableNotificationForSelectedPlace.value!!
             _enableNotificationForSelectedPlace.value = enable
             if (enable) {
-                PlaceNotifier.enableNotificationForPlace(_selectedPlace.value!!)
+                _destination.value = _selectedPlace.value
+                enableNotification()
             } else {
-                PlaceNotifier.disableNotification()
+                disableNotification()
             }
         }
         updateMapCamera()
@@ -77,6 +81,15 @@ class MainActivityViewModel : ViewModel() {
             MapCameraMode.CENTER_TERMINALS -> MapCameraMode.FREE
         }
         updateMapCamera()
+    }
+
+    private fun enableNotification() {
+        // TODO: Handle old destination
+        PlaceNotifier.enableNotificationForPlace(_destination.value!!)
+    }
+
+    private fun disableNotification() {
+        PlaceNotifier.disableNotification()
     }
 
     private fun updateMapCamera() {

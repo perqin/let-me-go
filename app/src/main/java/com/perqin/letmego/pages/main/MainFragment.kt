@@ -1,5 +1,6 @@
 package com.perqin.letmego.pages.main
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,17 +13,16 @@ import com.perqin.letmego.data.place.Place
 import com.tencent.tencentmap.mapsdk.maps.CameraUpdateFactory
 import com.tencent.tencentmap.mapsdk.maps.SupportMapFragment
 import com.tencent.tencentmap.mapsdk.maps.TencentMap
-import com.tencent.tencentmap.mapsdk.maps.model.LatLng
-import com.tencent.tencentmap.mapsdk.maps.model.LatLngBounds
-import com.tencent.tencentmap.mapsdk.maps.model.Marker
-import com.tencent.tencentmap.mapsdk.maps.model.MarkerOptions
+import com.tencent.tencentmap.mapsdk.maps.model.*
 
 class MainFragment : Fragment() {
     private lateinit var tencentMap: TencentMap
     private lateinit var myLocationMarker: Marker
     private lateinit var activityViewModel: MainActivityViewModel
     private lateinit var viewModel: MainFragmentViewModel
-    private var defaultMarker: Marker? = null
+    private var destinationMarker: Marker? = null
+    private var destinationRangeCircle: Circle? = null
+    private var selectedPlaceMarker: Marker? = null
     private var mapCameraMode = MainActivityViewModel.MapCameraMode.FREE
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -54,15 +54,21 @@ class MainFragment : Fragment() {
         activityViewModel.myLocation.observe(this, Observer {
             myLocationMarker.position = LatLng(it.latitude, it.longitude)
         })
+        activityViewModel.destination.observe(this, Observer {
+            if (it != null) {
+                showDestinationMarker(it)
+            } else {
+                hideDestinationMarker()
+            }
+        })
         activityViewModel.selectedPlace.observe(this, Observer {
             if (it != null) {
-                showDefaultMarker(it)
+                showSelectedPlaceMarker(it)
             } else {
-                hideDefaultMarker()
+                hideSelectedPlaceMarker()
             }
         })
         activityViewModel.mapCameraTargets.observe(this, Observer { targets ->
-            println("Update camera for targets: ${targets.joinToString { "(${it.latitude}, ${it.longitude})" }}")
             val padding = context!!.resources.getDimensionPixelSize(R.dimen.map_camera_padding)
             if (targets.size == 1) {
                 // Center it
@@ -86,18 +92,43 @@ class MainFragment : Fragment() {
         viewModel = ViewModelProviders.of(this).get(MainFragmentViewModel::class.java)
     }
 
-    private fun showDefaultMarker(place: Place) {
+    private fun showSelectedPlaceMarker(place: Place) {
         val latLng = LatLng(place.latitude, place.longitude)
-        if (defaultMarker == null) {
-            defaultMarker = tencentMap.addMarker(MarkerOptions(latLng))
+        if (selectedPlaceMarker == null) {
+            selectedPlaceMarker = tencentMap.addMarker(MarkerOptions(latLng))
         } else {
-            defaultMarker!!.position = latLng
+            selectedPlaceMarker!!.position = latLng
         }
     }
 
-    private fun hideDefaultMarker() {
-        defaultMarker?.remove()
-        defaultMarker = null
+    private fun hideSelectedPlaceMarker() {
+        selectedPlaceMarker?.remove()
+        selectedPlaceMarker = null
+    }
+
+    private fun showDestinationMarker(place: Place) {
+        val latLng = LatLng(place.latitude, place.longitude)
+        if (destinationMarker == null) {
+            destinationMarker = tencentMap.addMarker(MarkerOptions(latLng))
+        } else {
+            destinationMarker!!.position = latLng
+        }
+        if (destinationRangeCircle == null) {
+            destinationRangeCircle = tencentMap.addCircle(
+                    CircleOptions()
+                            .center(latLng)
+                            .radius(500.0)
+                            .strokeWidth(0F)
+                            .fillColor(Color.parseColor("#7F009688"))
+            )
+        } else {
+            destinationRangeCircle!!.center = latLng
+        }
+    }
+
+    private fun hideDestinationMarker() {
+        destinationMarker?.remove()
+        destinationMarker = null
     }
 
     companion object {
