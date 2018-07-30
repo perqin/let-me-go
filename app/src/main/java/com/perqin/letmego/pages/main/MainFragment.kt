@@ -1,10 +1,13 @@
 package com.perqin.letmego.pages.main
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -16,6 +19,7 @@ import com.tencent.tencentmap.mapsdk.maps.SupportMapFragment
 import com.tencent.tencentmap.mapsdk.maps.TencentMap
 import com.tencent.tencentmap.mapsdk.maps.TencentMapOptions
 import com.tencent.tencentmap.mapsdk.maps.model.*
+import kotlinx.android.synthetic.main.main_fragment.*
 
 class MainFragment : Fragment() {
     private lateinit var tencentMap: TencentMap
@@ -38,6 +42,12 @@ class MainFragment : Fragment() {
      */
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
+        grantPermissionsButton.setOnClickListener {
+            var array = emptyArray<String>()
+            MainActivityViewModel.permissionsList.forEach { array += it }
+            requestPermissions(array, REQUEST_ALL_PERMISSIONS)
+        }
 
         tencentMap = (childFragmentManager.findFragmentById(R.id.mapFragment) as SupportMapFragment).map
         tencentMap.uiSettings.apply {
@@ -132,8 +142,43 @@ class MainFragment : Fragment() {
                 }
             }
         })
+        activityViewModel.allPermissionsGranted.observe(this, Observer {
+            permissionsGuideConstraintLayout.visibility = if (it) View.GONE else View.VISIBLE
+        })
+        activityViewModel.grantedPermissions.observe(this, Observer {
+            val red = ContextCompat.getColor(context!!, R.color.red_500)
+            val green = ContextCompat.getColor(context!!, R.color.green_500)
+            phonePermissionTextView.setTextColor(
+                    if (it.containsAll(listOf(Manifest.permission.READ_PHONE_STATE)))
+                        green
+                    else
+                        red
+            )
+            locationPermissionTextView.setTextColor(
+                    if (it.containsAll(listOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)))
+                        green
+                    else
+                        red
+            )
+            storagePermissionTextView.setTextColor(
+                    if (it.containsAll(listOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)))
+                        green
+                    else
+                        red
+            )
+        })
 
         viewModel = ViewModelProviders.of(this).get(MainFragmentViewModel::class.java)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        if (requestCode == REQUEST_ALL_PERMISSIONS) {
+            for (i in 0 until permissions.size) {
+                if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                    activityViewModel.permissionsGranted(permissions[i])
+                }
+            }
+        }
     }
 
     private fun showSelectedPlaceMarker(place: Place) {
@@ -177,5 +222,7 @@ class MainFragment : Fragment() {
 
     companion object {
         fun newInstance() = MainFragment()
+
+        private const val REQUEST_ALL_PERMISSIONS = 1
     }
 }

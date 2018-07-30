@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">LET ME GO</string>
+    <string name="button_grant">Grant</string>
+    <string name="text_let_me_go_requires_permissions">LET ME GO uses Tencent LBS SDK which requires some permissions to work properly.</string>
+    <string name="text_phone_permission">Read phone state</string>
+    <string name="text_storage_permission">Read and write SD card</string>
+    <string name="text_location_permission">Access device\'s location</string>
 </resources>
