@@ -5,4 +5,5 @@
     <string name="text_phone_permission">Read phone state</string>
     <string name="text_storage_permission">Read and write SD card</string>
     <string name="text_location_permission">Access device\'s location</string>
+    <string name="point_on_map">Point on map</string>
 </resources>

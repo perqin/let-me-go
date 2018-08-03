@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModelProviders
 import com.perqin.letmego.R
 import com.perqin.letmego.data.place.Place
 import com.perqin.letmego.utils.TencentMapGestureAdapter
+import com.perqin.letmego.utils.createBitmapFromShapeResource
 import com.tencent.tencentmap.mapsdk.maps.CameraUpdateFactory
 import com.tencent.tencentmap.mapsdk.maps.SupportMapFragment
 import com.tencent.tencentmap.mapsdk.maps.TencentMap
@@ -97,7 +98,9 @@ class MainFragment : Fragment() {
         })
 
         @Suppress("DEPRECATION")
-        myLocationMarker = tencentMap.addMarker(MarkerOptions())
+        myLocationMarker = tencentMap.addMarker(MarkerOptions().apply {
+            icon(BitmapDescriptorFactory.fromBitmap(createBitmapFromShapeResource(context!!, R.drawable.my_location_marker)))
+        })
 
         activityViewModel = ViewModelProviders.of(activity!!).get(MainActivityViewModel::class.java)
         activityViewModel.mapCameraMode.observe(this, Observer {

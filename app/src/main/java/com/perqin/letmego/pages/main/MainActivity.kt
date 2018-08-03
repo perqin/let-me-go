@@ -20,12 +20,21 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
 
+        toolbar.title = getString(R.string.app_name)
+        setSupportActionBar(toolbar)
+
         viewModel = ViewModelProviders.of(this).get(MainActivityViewModel::class.java)
         viewModel.selectedPlace.observe(this, Observer {
             if (it != null) {
                 showDetail("(${it.latitude}, ${it.longitude})")
             } else {
                 hideDetail()
+            }
+        })
+        viewModel.selectedPlaceInfo.observe(this, Observer {
+            if (it != null) {
+                placeTitleTextView.text = it.title
+                placeAddressTextView.text = it.address
             }
         })
         viewModel.mapCameraMode.observe(this, Observer {

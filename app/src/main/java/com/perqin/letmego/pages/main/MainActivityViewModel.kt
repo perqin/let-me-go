@@ -2,15 +2,22 @@ package com.perqin.letmego.pages.main
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import com.perqin.letmego.App
+import com.perqin.letmego.data.api.TencentLbsApi
 import com.perqin.letmego.data.location.TencentLocator
 import com.perqin.letmego.data.place.Place
 import com.perqin.letmego.data.place.PlaceNotifier
+import com.perqin.letmego.data.placeinfo.PlaceInfo
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.withContext
 
 class MainActivityViewModel : ViewModel() {
     val myLocation: LiveData<Place> = Transformations.map(TencentLocator.getLocation()) {
@@ -22,6 +29,9 @@ class MainActivityViewModel : ViewModel() {
 
     private val _selectedPlace = MutableLiveData<Place?>()
     val selectedPlace: LiveData<Place?> = _selectedPlace
+
+    private val _selectedPlaceInfo = MutableLiveData<PlaceInfo?>()
+    val selectedPlaceInfo: LiveData<PlaceInfo?> = _selectedPlaceInfo
 
     private val _enableNotificationForSelectedPlace = MutableLiveData<Boolean>()
     val enableNotificationForSelectedPlace: LiveData<Boolean> = _enableNotificationForSelectedPlace
@@ -64,6 +74,16 @@ class MainActivityViewModel : ViewModel() {
 
     fun selectPlace(latitude: Double, longitude: Double) {
         _selectedPlace.value = Place(latitude, longitude)
+        launch(UI) {
+            try {
+                _selectedPlaceInfo.value = withContext(CommonPool) {
+                    TencentLbsApi.searchPlaceInfo(Place(latitude, longitude))
+                }
+            } catch (e: Exception) {
+                // TODO: Show error in UI
+                println("Error: ${e.message}")
+            }
+        }
     }
 
     fun toggleEnableNotificationForSelectedPlace() {
@@ -72,8 +92,13 @@ class MainActivityViewModel : ViewModel() {
             _enableNotificationForSelectedPlace.value = enable
             if (enable) {
                 _destination.value = _selectedPlace.value
+                _mapCameraMode.value = MapCameraMode.CENTER_TERMINALS
                 enableNotification()
             } else {
+                if (_selectedPlace.value == null) {
+                    _selectedPlace.value = _destination.value
+                }
+                _destination.value = null
                 disableNotification()
             }
         }

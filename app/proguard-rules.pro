@@ -22,3 +22,8 @@
 
 # TODO: Tencent LBS Map3D SDK: http://lbs.qq.com/android_v1/guide-project-setup.html
 # TODO: Tencent LBS Location SDK: http://lbs.qq.com/geo/guide-install.html
+
+# KotlinX Coroutines
+-keepclassmembernames class kotlinx.** {
+    volatile <fields>;
+}

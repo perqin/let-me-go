@@ -41,7 +41,7 @@
         <!-- BEGIN: Tencent LBS SDK -->
         <meta-data
             android:name="TencentMapSDK"
-            android:value="LEJBZ-4RB6W-DPPRV-R65FD-SBNJZ-E6BBH"/>
+            android:value="${TENCENT_LBS_KEY}"/>
         <!-- END: Tencent LBS SDK -->
         <activity
             android:name=".pages.main.MainActivity"
