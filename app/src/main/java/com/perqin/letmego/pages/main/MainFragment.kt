@@ -14,7 +14,7 @@ import androidx.lifecycle.ViewModelProviders
 import com.perqin.letmego.R
 import com.perqin.letmego.data.place.Place
 import com.perqin.letmego.utils.TencentMapGestureAdapter
-import com.perqin.letmego.utils.createBitmapFromShapeResource
+import com.perqin.letmego.utils.createBitmapFromDrawableRes
 import com.tencent.tencentmap.mapsdk.maps.CameraUpdateFactory
 import com.tencent.tencentmap.mapsdk.maps.SupportMapFragment
 import com.tencent.tencentmap.mapsdk.maps.TencentMap
@@ -99,7 +99,7 @@ class MainFragment : Fragment() {
 
         @Suppress("DEPRECATION")
         myLocationMarker = tencentMap.addMarker(MarkerOptions().apply {
-            icon(BitmapDescriptorFactory.fromBitmap(createBitmapFromShapeResource(context!!, R.drawable.my_location_marker)))
+            icon(BitmapDescriptorFactory.fromBitmap(createBitmapFromDrawableRes(context!!, R.drawable.my_location_marker)))
         })
 
         activityViewModel = ViewModelProviders.of(activity!!).get(MainActivityViewModel::class.java)
@@ -201,7 +201,9 @@ class MainFragment : Fragment() {
     private fun showDestinationMarker(place: Place) {
         val latLng = LatLng(place.latitude, place.longitude)
         if (destinationMarker == null) {
-            destinationMarker = tencentMap.addMarker(MarkerOptions(latLng))
+            destinationMarker = tencentMap.addMarker(MarkerOptions(latLng).apply {
+                icon(BitmapDescriptorFactory.fromBitmap(createBitmapFromDrawableRes(context!!, R.drawable.destination_marker)))
+            })
         } else {
             destinationMarker!!.position = latLng
         }
