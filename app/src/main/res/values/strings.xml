@@ -6,4 +6,6 @@
     <string name="text_storage_permission">Read and write SD card</string>
     <string name="text_location_permission">Access device\'s location</string>
     <string name="point_on_map">Point on map</string>
+    <string name="notification_title_tracking_foreground_service">Tracking title</string>
+    <string name="notification_text_tracking_foreground_service">Tracking content</string>
 </resources>

@@ -13,7 +13,8 @@ import androidx.annotation.RequiresApi
  *
  * @author perqin
  */
-val CHANNEL_ALERT = "com.perqin.letmego.CHANNEL_ALERT"
+const val CHANNEL_ALERT = "com.perqin.letmego.CHANNEL_ALERT"
+const val CHANNEL_TRACKING_FOREGROUND_SERVICE = "CHANNEL_TRACKING_FOREGROUND_SERVICE"
 
 class App : Application() {
     override fun onCreate() {
@@ -27,10 +28,14 @@ class App : Application() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannel() {
-        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
-                .createNotificationChannel(NotificationChannel(CHANNEL_ALERT, "Alert", NotificationManager.IMPORTANCE_HIGH).apply {
-                    description = "Alert that user is about to arrive"
-                })
+        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).run {
+            createNotificationChannel(NotificationChannel(CHANNEL_ALERT, "Alert", NotificationManager.IMPORTANCE_HIGH).apply {
+                description = "Alert that user is about to arrive"
+            })
+            createNotificationChannel(NotificationChannel(CHANNEL_TRACKING_FOREGROUND_SERVICE, "Tracking foreground service", NotificationManager.IMPORTANCE_LOW).apply {
+                description = "Tracking foreground service"
+            })
+        }
     }
 
     companion object {

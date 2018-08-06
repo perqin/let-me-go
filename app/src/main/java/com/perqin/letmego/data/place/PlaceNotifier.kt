@@ -8,6 +8,8 @@ import android.content.IntentFilter
 import android.os.Vibrator
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.perqin.letmego.App
 import com.perqin.letmego.CHANNEL_ALERT
@@ -39,6 +41,27 @@ object PlaceNotifier {
     }
 
     private var destination: Place? = null
+    private var activeDestinationLiveDataList = emptyList<MutableLiveData<Place?>>()
+
+    fun getDestinationLiveData(): LiveData<Place?> {
+        return object : MutableLiveData<Place?>() {
+            override fun onActive() {
+                activeDestinationLiveDataList += this
+                value = destination
+            }
+
+            override fun onInactive() {
+                activeDestinationLiveDataList -= this
+            }
+        }
+    }
+
+    fun setDestination(place: Place?) {
+        destination = place
+        activeDestinationLiveDataList.forEach {
+            it.value = destination
+        }
+    }
 
     /**
      * 0: Idle

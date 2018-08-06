@@ -1,9 +1,14 @@
 package com.perqin.letmego.pages.main
 
 import android.Manifest
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
+import android.os.IBinder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +18,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.perqin.letmego.R
 import com.perqin.letmego.data.place.Place
+import com.perqin.letmego.services.TrackingService
 import com.perqin.letmego.utils.TencentMapGestureAdapter
 import com.perqin.letmego.utils.createBitmapFromDrawableRes
 import com.tencent.tencentmap.mapsdk.maps.CameraUpdateFactory
@@ -23,6 +29,20 @@ import com.tencent.tencentmap.mapsdk.maps.model.*
 import kotlinx.android.synthetic.main.main_fragment.*
 
 class MainFragment : Fragment() {
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder) {
+            println("Connect!!")
+            trackingService = (service as TrackingService.LocalBinder).apply {
+                uiRequireMyLocationUpdates()
+            }
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            trackingService = null
+        }
+    }
+    private var trackingService: TrackingService.LocalBinder? = null
+
     private lateinit var tencentMap: TencentMap
     private lateinit var myLocationMarker: Marker
     private lateinit var activityViewModel: MainActivityViewModel
@@ -96,6 +116,9 @@ class MainFragment : Fragment() {
                 return false
             }
         })
+        tencentMap.setOnMapPoiClickListener {
+            activityViewModel.selectPlace(it.position.latitude, it.position.longitude, it.name)
+        }
 
         @Suppress("DEPRECATION")
         myLocationMarker = tencentMap.addMarker(MarkerOptions().apply {
@@ -146,7 +169,13 @@ class MainFragment : Fragment() {
             }
         })
         activityViewModel.allPermissionsGranted.observe(this, Observer {
+            println("MainFragment: $it")
             permissionsGuideConstraintLayout.visibility = if (it) View.GONE else View.VISIBLE
+            if (it && trackingService == null) {
+                context!!.run {
+                    bindService(Intent(this, TrackingService::class.java), serviceConnection, Context.BIND_AUTO_CREATE)
+                }
+            }
         })
         activityViewModel.grantedPermissions.observe(this, Observer {
             val red = ContextCompat.getColor(context!!, R.color.red_500)
@@ -172,6 +201,12 @@ class MainFragment : Fragment() {
         })
 
         viewModel = ViewModelProviders.of(this).get(MainFragmentViewModel::class.java)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        trackingService?.uiNotRequireMyLocationUpdates()
+        context!!.unbindService(serviceConnection)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {

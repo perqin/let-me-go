@@ -1,34 +1,61 @@
 package com.perqin.letmego.pages.main
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
-import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
 import com.perqin.letmego.App
 import com.perqin.letmego.data.api.TencentLbsApi
 import com.perqin.letmego.data.location.TencentLocator
 import com.perqin.letmego.data.place.Place
 import com.perqin.letmego.data.place.PlaceNotifier
 import com.perqin.letmego.data.placeinfo.PlaceInfo
+import com.perqin.letmego.data.preferences.PreferencesRepo
+import com.perqin.letmego.services.TrackingService
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.withContext
 
 class MainActivityViewModel : ViewModel() {
-    val myLocation: LiveData<Place> = Transformations.map(TencentLocator.getLocation()) {
+    private val myLocationFromLocator: LiveData<Place> = Transformations.map(TencentLocator.getLocation()) {
         Place(it.latitude, it.longitude)
     }
+    private val _myLocationCache = MutableLiveData<Place?>()
+    val myLocation: LiveData<Place> = MediatorLiveData<Place>().apply {
+        addSource(_myLocationCache) {
+            if (value == null) {
+                value = it
+            }
+        }
+        addSource(myLocationFromLocator) {
+            value = it
+        }
+    }
 
-    private val _destination = MutableLiveData<Place?>()
-    val destination: LiveData<Place?> = _destination
+    val destination: LiveData<Place?> = PlaceNotifier.getDestinationLiveData()
 
     private val _selectedPlace = MutableLiveData<Place?>()
-    val selectedPlace: LiveData<Place?> = _selectedPlace
+    val selectedPlace: LiveData<Place?> = object : MediatorLiveData<Place?>() {
+        private var userSelectedPlace: Place? = null
+        private var destination: Place? = null
+
+        init {
+            addSource(this@MainActivityViewModel.destination) {
+                this.destination = it
+                updateValue()
+            }
+            addSource(this@MainActivityViewModel._selectedPlace) {
+                this.userSelectedPlace = it
+                updateValue()
+            }
+        }
+
+        private fun updateValue() {
+            value = destination?: userSelectedPlace
+        }
+    }
 
     private val _selectedPlaceInfo = MutableLiveData<PlaceInfo?>()
     val selectedPlaceInfo: LiveData<PlaceInfo?> = _selectedPlaceInfo
@@ -46,10 +73,8 @@ class MainActivityViewModel : ViewModel() {
     val grantedPermissions: LiveData<Set<String>> = _grantedPermissions
 
     val allPermissionsGranted: LiveData<Boolean> = Transformations.map(_grantedPermissions) {
-        (_grantedPermissions.value?: emptySet()).containsAll(permissionsList)
+        it.containsAll(permissionsList)
     }
-
-    private var mapPrepared = false
 
     init {
         _enableNotificationForSelectedPlace.value = false
@@ -57,27 +82,27 @@ class MainActivityViewModel : ViewModel() {
         _mapCameraTargets.value = emptyList()
         _grantedPermissions.value = emptySet()
         myLocation.observeForever { updateMapCameraTargets() }
-        _destination.observeForever { updateMapCameraTargets() }
+        destination.observeForever { updateMapCameraTargets() }
         _selectedPlace.observeForever { updateMapCameraTargets() }
-        _mapCameraMode.observeForever { updateMapCameraTargets() }
-        _grantedPermissions.observeForever {
-            if (!mapPrepared && it.containsAll(permissionsList)) {
-                prepareMap()
-                mapPrepared = true
+        // This is the place displayed on screen, which should cause address search
+        selectedPlace.observeForever {
+            it?.run {
+                searchSelectedPlace(latitude, longitude)
             }
         }
+        _mapCameraMode.observeForever { updateMapCameraTargets() }
     }
 
-    fun deselectPlace() {
-        _selectedPlace.value = null
-    }
-
-    fun selectPlace(latitude: Double, longitude: Double) {
+    fun selectPlace(latitude: Double, longitude: Double, suggestedName: String? = null) {
         _selectedPlace.value = Place(latitude, longitude)
+        searchSelectedPlace(latitude, longitude, suggestedName)
+    }
+
+    private fun searchSelectedPlace(latitude: Double, longitude: Double, suggestedName: String? = null) {
         launch(UI) {
             try {
                 _selectedPlaceInfo.value = withContext(CommonPool) {
-                    TencentLbsApi.searchPlaceInfo(Place(latitude, longitude))
+                    TencentLbsApi.searchPlaceInfo(Place(latitude, longitude), suggestedName)
                 }
             } catch (e: Exception) {
                 // TODO: Show error in UI
@@ -86,19 +111,23 @@ class MainActivityViewModel : ViewModel() {
         }
     }
 
+    fun deselectPlace() {
+        _selectedPlace.value = null
+    }
+
     fun toggleEnableNotificationForSelectedPlace() {
         if (_selectedPlace.value != null) {
             val enable = !_enableNotificationForSelectedPlace.value!!
             _enableNotificationForSelectedPlace.value = enable
             if (enable) {
-                _destination.value = _selectedPlace.value
+                PlaceNotifier.setDestination(_selectedPlace.value)
                 _mapCameraMode.value = MapCameraMode.CENTER_TERMINALS
                 enableNotification()
             } else {
                 if (_selectedPlace.value == null) {
-                    _selectedPlace.value = _destination.value
+                    _selectedPlace.value = destination.value
                 }
-                _destination.value = null
+                PlaceNotifier.setDestination(null)
                 disableNotification()
             }
         }
@@ -109,17 +138,15 @@ class MainActivityViewModel : ViewModel() {
             if (ContextCompat.checkSelfPermission(App.context, it) == PackageManager.PERMISSION_GRANTED)
                 _grantedPermissions.value = (_grantedPermissions.value?: emptySet()) + it
         }
-    }
-
-    private fun prepareMap() {
-        PlaceNotifier.startup()
+        // Restore camera
+        PreferencesRepo.loadMyLocation()?.let {
+            _myLocationCache.value = it
+        }
     }
 
     fun activityDestroy() {
-        if (mapPrepared) {
-            // TODO: Only shutdown when no ongoing destination
-            PlaceNotifier.shutdown()
-        }
+        // Save current location for next startup
+        PreferencesRepo.saveMyLocation(myLocation.value)
     }
 
     fun rotateMapCameraMode() {
@@ -135,18 +162,26 @@ class MainActivityViewModel : ViewModel() {
     }
 
     private fun enableNotification() {
-        // TODO: Handle old destination
-        PlaceNotifier.enableNotificationForPlace(_destination.value!!)
+        val des = destination.value
+        if (des != null) {
+            App.context.run {
+                ContextCompat.startForegroundService(this, Intent(this, TrackingService::class.java).apply {
+                    action = TrackingService.ACTION_START_TRACKING
+                    putExtra(TrackingService.EXTRA_DESTINATION_LAT, des.latitude)
+                    putExtra(TrackingService.EXTRA_DESTINATION_LNG, des.longitude)
+                })
+            }
+        }
     }
 
     private fun disableNotification() {
-        PlaceNotifier.disableNotification()
+        App.context.sendBroadcast(Intent(TrackingService.ACTION_STOP_TRACKING))
     }
 
     private fun updateMapCameraTargets() {
         val mode = _mapCameraMode.value?: MapCameraMode.FREE
         val myLocation = this.myLocation.value
-        val selectedPlace = this.selectedPlace.value
+        val selectedPlace = this._selectedPlace.value
         _mapCameraTargets.value = if (myLocation != null) {
             when (mode) {
                 MainActivityViewModel.MapCameraMode.FREE -> emptyList()
