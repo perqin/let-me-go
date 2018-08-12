@@ -50,7 +50,6 @@ class MainFragment : Fragment() {
     private var destinationMarker: Marker? = null
     private var destinationRangeCircle: Circle? = null
     private var selectedPlaceMarker: Marker? = null
-    private var mapCameraMode = MainActivityViewModel.MapCameraMode.FREE
     private var lockMapCamera: Boolean = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -126,9 +125,6 @@ class MainFragment : Fragment() {
         })
 
         activityViewModel = ViewModelProviders.of(activity!!).get(MainActivityViewModel::class.java)
-        activityViewModel.mapCameraMode.observe(this, Observer {
-            mapCameraMode = it
-        })
         activityViewModel.myLocation.observe(this, Observer {
             myLocationMarker.position = LatLng(it.latitude, it.longitude)
         })
@@ -146,20 +142,20 @@ class MainFragment : Fragment() {
                 hideSelectedPlaceMarker()
             }
         })
-        activityViewModel.mapCameraTargets.observe(this, Observer { targets ->
+        activityViewModel.cameraStatus.observe(this, Observer {
             if (!lockMapCamera) {
-                val padding = context!!.resources.getDimensionPixelSize(R.dimen.map_camera_padding)
-                if (targets.size == 1) {
+                if (it.mode == MainActivityViewModel.MapCameraMode.CENTER_MY_LOCATION && it.targets.isNotEmpty()) {
                     // Center it
                     tencentMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                            LatLng(targets[0].latitude, targets[0].longitude),
+                            LatLng(it.targets[0].latitude, it.targets[0].longitude),
                             15.0F
                     ))
-                } else if (targets.size > 1) {
+                } else if (it.mode == MainActivityViewModel.MapCameraMode.CENTER_TERMINALS && it.targets.size > 1) {
                     // Zoom to include all places
+                    val padding = context!!.resources.getDimensionPixelSize(R.dimen.map_camera_padding)
                     tencentMap.animateCamera(CameraUpdateFactory.newLatLngBoundsRect(
                             LatLngBounds.builder().apply {
-                                targets.forEach {
+                                it.targets.forEach {
                                     include(LatLng(it.latitude, it.longitude))
                                 }
                             }.build(),

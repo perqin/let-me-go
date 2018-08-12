@@ -22,6 +22,7 @@ class MainActivityViewModel : ViewModel() {
     private val myLocationFromLocator: LiveData<Place> = Transformations.map(TencentLocator.getLocation()) {
         Place(it.latitude, it.longitude)
     }
+
     private val _myLocationCache = MutableLiveData<Place?>()
     val myLocation: LiveData<Place> = MediatorLiveData<Place>().apply {
         addSource(_myLocationCache) {
@@ -53,21 +54,54 @@ class MainActivityViewModel : ViewModel() {
         }
 
         private fun updateValue() {
-            value = destination?: userSelectedPlace
+            value = userSelectedPlace?: destination
         }
     }
 
     private val _selectedPlaceInfo = MutableLiveData<PlaceInfo?>()
     val selectedPlaceInfo: LiveData<PlaceInfo?> = _selectedPlaceInfo
 
-    private val _enableNotificationForSelectedPlace = MutableLiveData<Boolean>()
-    val enableNotificationForSelectedPlace: LiveData<Boolean> = _enableNotificationForSelectedPlace
+//    private val _enableNotificationForSelectedPlace = MutableLiveData<Boolean>()
+    val enableNotificationForSelectedPlace = object : LiveData<Boolean>() {
+        private var selectedPlace: Place? = null
+        private var destination: Place? = null
 
-    private val _mapCameraMode = MutableLiveData<MapCameraMode>()
-    val mapCameraMode: LiveData<MapCameraMode> = _mapCameraMode
+        init {
+            this@MainActivityViewModel.selectedPlace.observeForever {
+                this.selectedPlace = it
+                updateValue()
+            }
+            this@MainActivityViewModel.destination.observeForever {
+                this.destination = it
+                updateValue()
+            }
+        }
 
-    private val _mapCameraTargets = MutableLiveData<List<Place>>()
-    val mapCameraTargets: LiveData<List<Place>> = _mapCameraTargets
+        private fun updateValue() {
+            value = selectedPlace != null && destination != null &&
+                    selectedPlace!!.latitude == destination!!.latitude &&
+                    selectedPlace!!.longitude == destination!!.longitude
+        }
+    }
+
+//    private val _mapCameraMode = MutableLiveData<MapCameraMode>()
+//    val mapCameraMode: LiveData<MapCameraMode> = Transformations.map(_mapCameraMode) {
+//        if (it == MapCameraMode.AUTO) {
+//            when {
+//                destination.value != null -> MapCameraMode.CENTER_TERMINALS
+//                myLocation.value != null -> MapCameraMode.CENTER_MY_LOCATION
+//                else -> MapCameraMode.FREE
+//            }
+//        } else {
+//            it
+//        }
+//    }
+//
+//    private val _mapCameraTargets = MutableLiveData<List<Place>>()
+//    val mapCameraTargets: LiveData<List<Place>> = _mapCameraTargets
+    private val _cameraMode = MutableLiveData<MapCameraMode>()
+    private val _cameraStatus = MutableLiveData<CameraStatus>()
+    val cameraStatus: LiveData<CameraStatus> = _cameraStatus
 
     private val _grantedPermissions = MutableLiveData<Set<String>>()
     val grantedPermissions: LiveData<Set<String>> = _grantedPermissions
@@ -77,25 +111,27 @@ class MainActivityViewModel : ViewModel() {
     }
 
     init {
-        _enableNotificationForSelectedPlace.value = false
-        _mapCameraMode.value = MapCameraMode.CENTER_MY_LOCATION
-        _mapCameraTargets.value = emptyList()
+//        _enableNotificationForSelectedPlace.value = false
+//        _mapCameraMode.value = MapCameraMode.AUTO
+//        _mapCameraTargets.value = emptyList()
+//        _cameraStatus.value = CameraStatus(MapCameraMode.AUTO, emptyList())
         _grantedPermissions.value = emptySet()
-        myLocation.observeForever { updateMapCameraTargets() }
-        destination.observeForever { updateMapCameraTargets() }
-        _selectedPlace.observeForever { updateMapCameraTargets() }
+        _cameraMode.observeForever { updateMapCameraStatus() }
+        myLocation.observeForever { updateMapCameraStatus() }
+        destination.observeForever { updateMapCameraStatus() }
+//        _selectedPlace.observeForever { updateMapCameraStatus() }
         // This is the place displayed on screen, which should cause address search
         selectedPlace.observeForever {
             it?.run {
                 searchSelectedPlace(latitude, longitude)
             }
         }
-        _mapCameraMode.observeForever { updateMapCameraTargets() }
+//        _mapCameraMode.observeForever { updateMapCameraTargets() }
     }
 
     fun selectPlace(latitude: Double, longitude: Double, suggestedName: String? = null) {
         _selectedPlace.value = Place(latitude, longitude)
-        searchSelectedPlace(latitude, longitude, suggestedName)
+//        searchSelectedPlace(latitude, longitude, suggestedName)
     }
 
     private fun searchSelectedPlace(latitude: Double, longitude: Double, suggestedName: String? = null) {
@@ -116,21 +152,24 @@ class MainActivityViewModel : ViewModel() {
     }
 
     fun toggleEnableNotificationForSelectedPlace() {
-        if (_selectedPlace.value != null) {
-            val enable = !_enableNotificationForSelectedPlace.value!!
-            _enableNotificationForSelectedPlace.value = enable
-            if (enable) {
-                PlaceNotifier.setDestination(_selectedPlace.value)
-                _mapCameraMode.value = MapCameraMode.CENTER_TERMINALS
-                enableNotification()
-            } else {
-                if (_selectedPlace.value == null) {
-                    _selectedPlace.value = destination.value
-                }
-                PlaceNotifier.setDestination(null)
-                disableNotification()
-            }
+        selectedPlace.value?.let {
+            PlaceNotifier.setOrUnsetDestination(it)
         }
+//        if (_selectedPlace.value != null) {
+//            val enable = !_enableNotificationForSelectedPlace.value!!
+//            _enableNotificationForSelectedPlace.value = enable
+//            if (enable) {
+//                PlaceNotifier.setDestination(_selectedPlace.value)
+//                _cameraMode.value = MapCameraMode.CENTER_TERMINALS
+//                enableNotification()
+//            } else {
+//                if (_selectedPlace.value == null) {
+//                    _selectedPlace.value = destination.value
+//                }
+//                PlaceNotifier.setDestination(null)
+//                disableNotification()
+//            }
+//        }
     }
 
     fun activityCreate() {
@@ -150,15 +189,38 @@ class MainActivityViewModel : ViewModel() {
     }
 
     fun rotateMapCameraMode() {
-        _mapCameraMode.value = when (_mapCameraMode.value?: MapCameraMode.FREE) {
-            MapCameraMode.FREE -> MapCameraMode.CENTER_MY_LOCATION
-            MapCameraMode.CENTER_MY_LOCATION ->
-                if (_selectedPlace.value != null)
-                    MapCameraMode.CENTER_TERMINALS
-                else
-                    MapCameraMode.FREE
-            MapCameraMode.CENTER_TERMINALS -> MapCameraMode.FREE
+//        _mapCameraMode.value = when (_mapCameraMode.value?: MapCameraMode.FREE) {
+//            MapCameraMode.FREE -> MapCameraMode.CENTER_MY_LOCATION
+//            MapCameraMode.CENTER_MY_LOCATION ->
+//                if (_selectedPlace.value != null)
+//                    MapCameraMode.CENTER_TERMINALS
+//                else
+//                    MapCameraMode.FREE
+//            MapCameraMode.CENTER_TERMINALS -> MapCameraMode.FREE
+//        }
+        val currentMode = cameraStatus.value?.mode
+        if (currentMode == MapCameraMode.FREE) {
+            _cameraMode.value = MapCameraMode.CENTER_MY_LOCATION
+        } else if (currentMode == MapCameraMode.CENTER_MY_LOCATION) {
+            _cameraMode.value = if (destination.value != null) {
+                MapCameraMode.CENTER_TERMINALS
+            } else {
+                MapCameraMode.FREE
+            }
+        } else if (currentMode == MapCameraMode.CENTER_TERMINALS) {
+            _cameraMode.value = MapCameraMode.FREE
         }
+//        _cameraMode.value = when (currentMode) {
+//            MapCameraMode.FREE -> MapCameraMode.CENTER_MY_LOCATION
+//            MapCameraMode.CENTER_MY_LOCATION ->
+//                if (_selectedPlace.value != null) {
+//                    MapCameraMode.CENTER_TERMINALS
+//                } else {
+//                    MapCameraMode.FREE
+//                }
+//            MapCameraMode.CENTER_TERMINALS -> MapCameraMode.FREE
+//            else -> MapCameraMode.FREE
+//        }
     }
 
     private fun enableNotification() {
@@ -178,25 +240,44 @@ class MainActivityViewModel : ViewModel() {
         App.context.sendBroadcast(Intent(TrackingService.ACTION_STOP_TRACKING))
     }
 
-    private fun updateMapCameraTargets() {
-        val mode = _mapCameraMode.value?: MapCameraMode.FREE
-        val myLocation = this.myLocation.value
-        val selectedPlace = this._selectedPlace.value
-        _mapCameraTargets.value = if (myLocation != null) {
-            when (mode) {
-                MainActivityViewModel.MapCameraMode.FREE -> emptyList()
-                MainActivityViewModel.MapCameraMode.CENTER_MY_LOCATION -> listOf(myLocation)
-                MainActivityViewModel.MapCameraMode.CENTER_TERMINALS -> listOf(myLocation, selectedPlace!!)
+//    private fun updateMapCameraTargets() {
+//        val mode = _mapCameraMode.value?: MapCameraMode.FREE
+//        val myLocation = this.myLocation.value
+//        val selectedPlace = this._selectedPlace.value
+//        _mapCameraTargets.value = if (myLocation != null) {
+//            when (mode) {
+//                MainActivityViewModel.MapCameraMode.FREE -> emptyList()
+//                MainActivityViewModel.MapCameraMode.CENTER_MY_LOCATION -> listOf(myLocation)
+//                MainActivityViewModel.MapCameraMode.CENTER_TERMINALS -> listOf(myLocation, selectedPlace!!)
+//            }
+//        } else {
+//            emptyList()
+//        }
+//    }
+
+    private fun updateMapCameraStatus() {
+        val mode = _cameraMode.value?: MapCameraMode.AUTO
+        val myLocation = myLocation.value
+        val destination = destination.value
+        _cameraStatus.value = when (mode) {
+            MapCameraMode.AUTO -> {
+                if (destination != null) {
+                    CameraStatus.centerTerminals(listOf(myLocation, destination))
+                } else {
+                    CameraStatus.centerMyLocation(myLocation)
+                }
             }
-        } else {
-            emptyList()
+            MapCameraMode.FREE -> CameraStatus.free()
+            MapCameraMode.CENTER_MY_LOCATION -> CameraStatus.centerMyLocation(myLocation)
+            MapCameraMode.CENTER_TERMINALS -> CameraStatus.centerTerminals(listOf(myLocation, destination!!))
         }
     }
 
     fun freeMapCamera() {
-        if (_mapCameraMode.value != MapCameraMode.FREE) {
-            _mapCameraMode.value = MapCameraMode.FREE
-        }
+//        if (_mapCameraMode.value != MapCameraMode.FREE) {
+//            _mapCameraMode.value = MapCameraMode.FREE
+//        }
+        _cameraMode.value = MapCameraMode.FREE
     }
 
     fun permissionsGranted(vararg permissions: String) {
@@ -213,5 +294,16 @@ class MainActivityViewModel : ViewModel() {
         )
     }
 
-    enum class MapCameraMode { FREE, CENTER_MY_LOCATION, CENTER_TERMINALS }
+    enum class MapCameraMode { AUTO, FREE, CENTER_MY_LOCATION, CENTER_TERMINALS }
+
+    data class CameraStatus(
+            val mode: MapCameraMode,
+            val targets: List<Place> = emptyList()
+    ) {
+        companion object {
+            fun free() = CameraStatus(MapCameraMode.FREE)
+            fun centerMyLocation(myLocation: Place?) = CameraStatus(MapCameraMode.CENTER_MY_LOCATION, listOfNotNull(myLocation))
+            fun centerTerminals(terminals: List<Place?>) = CameraStatus(MapCameraMode.CENTER_TERMINALS, terminals.filterNotNull())
+        }
+    }
 }

@@ -27,3 +27,7 @@
 -keepclassmembernames class kotlinx.** {
     volatile <fields>;
 }
+
+# Tencent Bugly
+-dontwarn com.tencent.bugly.**
+-keep public class com.tencent.bugly.**{*;}

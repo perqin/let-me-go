@@ -7,6 +7,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.tencent.bugly.crashreport.CrashReport
 
 /**
  * Created on 7/21/18.
@@ -24,6 +25,10 @@ class App : Application() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel()
         }
+
+        // Tencent Bugly
+        CrashReport.initCrashReport(this)
+        CrashReport.setIsDevelopmentDevice(this, BuildConfig.DEBUG)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

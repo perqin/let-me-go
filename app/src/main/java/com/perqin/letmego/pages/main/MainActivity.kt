@@ -37,8 +37,8 @@ class MainActivity : AppCompatActivity() {
                 placeAddressTextView.text = it.address
             }
         })
-        viewModel.mapCameraMode.observe(this, Observer {
-            when (it!!) {
+        viewModel.cameraStatus.observe(this, Observer {
+            when(it!!.mode) {
                 MainActivityViewModel.MapCameraMode.FREE -> {
                     mapCameraModeFab.setImageResource(R.drawable.ic_my_location_black_24dp)
                     mapCameraModeFab.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.tint_inactivate))
@@ -51,6 +51,7 @@ class MainActivity : AppCompatActivity() {
                     mapCameraModeFab.setImageResource(R.drawable.ic_center_focus_strong_black_24dp)
                     mapCameraModeFab.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.tint_activate))
                 }
+                else -> {}
             }
         })
         viewModel.enableNotificationForSelectedPlace.observe(this, Observer {

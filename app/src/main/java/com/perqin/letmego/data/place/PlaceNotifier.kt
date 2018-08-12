@@ -90,6 +90,16 @@ object PlaceNotifier {
         TencentLocator.disable()
     }
 
+    fun setOrUnsetDestination(destination: Place) {
+        if (this.destination != null && Place.isEqual(this.destination!!, destination)) {
+            setDestination(null)
+            // TODO: Unset
+        } else {
+            setDestination(destination)
+            // TODO: Set
+        }
+    }
+
     private fun ensureLocation() {
         TencentLocator.enable()
         myLocation.observeForever(myLocationObserver)
