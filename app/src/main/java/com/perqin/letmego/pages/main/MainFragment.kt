@@ -31,7 +31,6 @@ import kotlinx.android.synthetic.main.main_fragment.*
 class MainFragment : Fragment() {
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder) {
-            println("Connect!!")
             trackingService = (service as TrackingService.LocalBinder).apply {
                 uiRequireMyLocationUpdates()
             }

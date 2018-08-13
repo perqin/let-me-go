@@ -1,20 +1,17 @@
 package com.perqin.letmego.data.place
 
-import android.app.PendingIntent
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Vibrator
-import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.perqin.letmego.App
-import com.perqin.letmego.CHANNEL_ALERT
-import com.perqin.letmego.R
 import com.perqin.letmego.data.location.TencentLocator
+import com.perqin.letmego.notification.NOTIFICATION_ID_TRACKING_FOREGROUND_SERVICE
+import com.perqin.letmego.notification.createArrivalNotification
+import com.perqin.letmego.services.TrackingService
 import com.tencent.map.geolocation.TencentLocation
 import com.tencent.map.geolocation.TencentLocationUtils
 
@@ -22,8 +19,15 @@ import com.tencent.map.geolocation.TencentLocationUtils
  * @author perqin
  */
 object PlaceNotifier {
-    private const val REQUEST_CODE_IGNORE_NOTIFICATION = 233
-    private const val ACTION_IGNORE_NOTIFICATION = "com.perqin.letmego.ACTION_IGNORE_NOTIFICATION"
+    var myLocationRequired = false
+        set(value) {
+            field = value
+            if (value) {
+                TencentLocator.enable()
+            } else if (destination == null) {
+                TencentLocator.disable()
+            }
+        }
 
     private val myLocation = TencentLocator.getLocation()
 
@@ -31,16 +35,11 @@ object PlaceNotifier {
         checkNotification(it.latitude, it.longitude)
     }
 
-    private val ignoreNotificationReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            if (intent.action == ACTION_IGNORE_NOTIFICATION) {
-                stopVibration()
-                notificationStatus = 2
-            }
-        }
-    }
-
     private var destination: Place? = null
+        set(value) {
+            field = value
+            activeDestinationLiveDataList.forEach { it.value = value }
+        }
     private var activeDestinationLiveDataList = emptyList<MutableLiveData<Place?>>()
 
     fun getDestinationLiveData(): LiveData<Place?> {
@@ -56,53 +55,43 @@ object PlaceNotifier {
         }
     }
 
-    fun setDestination(place: Place?) {
-        destination = place
-        activeDestinationLiveDataList.forEach {
-            it.value = destination
-        }
-    }
-
     /**
      * 0: Idle
      * 1: Notifying
-     * 2: Ignored (user've noticed the notification)
      */
     private var notificationStatus = 0
+    fun isArrived() = notificationStatus == 1
 
-    fun enableNotificationForPlace(place: Place) {
-        destination = place
-        ensureLocation()
-        App.context.registerReceiver(ignoreNotificationReceiver, IntentFilter(ACTION_IGNORE_NOTIFICATION))
-    }
-
-    fun disableNotification() {
-        destination = null
-        App.context.unregisterReceiver(ignoreNotificationReceiver)
-    }
-
-    fun startup() {
-        ensureLocation()
-    }
-
-    fun shutdown() {
-        myLocation.removeObserver(myLocationObserver)
-        TencentLocator.disable()
-    }
-
-    fun setOrUnsetDestination(destination: Place) {
-        if (this.destination != null && Place.isEqual(this.destination!!, destination)) {
-            setDestination(null)
-            // TODO: Unset
+    /**
+     * @param destination if it is the same as this.destination or null, stop tracking, otherwise update tracking destination
+     */
+    fun setOrUnsetDestination(destination: Place?) {
+        if (destination == null || (this.destination != null && Place.isEqual(this.destination!!, destination))) {
+            this.destination = null
+            // Stop tracking
+            myLocation.removeObserver(myLocationObserver)
+            App.context.run { startService(Intent(this, TrackingService::class.java).apply {
+                action = TrackingService.ACTION_STOP_TRACKING
+            }) }
+            // Stop notification is needed
+            if (notificationStatus == 1) {
+                notificationStatus = 0
+                stopVibration()
+            }
+            // Stop locating if unnecessary
+            if (!myLocationRequired) {
+                TencentLocator.disable()
+            }
         } else {
-            setDestination(destination)
-            // TODO: Set
+            this.destination = destination
+            // Start tracking new destination
+            myLocation.observeForever(myLocationObserver)
+            App.context.run { startService(Intent(this, TrackingService::class.java).apply {
+                action = TrackingService.ACTION_START_TRACKING
+            }) }
+            // Start locating
+            TencentLocator.enable()
         }
-    }
-
-    private fun ensureLocation() {
-        TencentLocator.enable()
-        myLocation.observeForever(myLocationObserver)
     }
 
     private fun checkNotification(latitude: Double, longitude: Double) {
@@ -118,21 +107,8 @@ object PlaceNotifier {
         if (notificationStatus == 0) {
             notificationStatus = 1
             // Send system notification
-            val notification = NotificationCompat.Builder(App.context, CHANNEL_ALERT)
-                    .setSmallIcon(R.mipmap.ic_launcher)
-                    .setContentTitle(App.context.getString(R.string.app_name))
-                    .setContentText("You are about to arrive!!!")
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .setAutoCancel(true)
-                    .setOngoing(true)
-                    .setContentIntent(PendingIntent.getBroadcast(
-                            App.context,
-                            REQUEST_CODE_IGNORE_NOTIFICATION,
-                            Intent(ACTION_IGNORE_NOTIFICATION),
-                            0
-                    ))
-                    .build()
-            NotificationManagerCompat.from(App.context).notify(233, notification)
+            NotificationManagerCompat.from(App.context).notify(NOTIFICATION_ID_TRACKING_FOREGROUND_SERVICE,
+                    createArrivalNotification())
             // Start vibration
             startVibration()
         }

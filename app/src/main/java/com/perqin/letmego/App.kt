@@ -7,6 +7,8 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.perqin.letmego.notification.CHANNEL_ALERT
+import com.perqin.letmego.notification.CHANNEL_TRACKING_FOREGROUND_SERVICE
 import com.tencent.bugly.crashreport.CrashReport
 
 /**
@@ -14,8 +16,6 @@ import com.tencent.bugly.crashreport.CrashReport
  *
  * @author perqin
  */
-const val CHANNEL_ALERT = "com.perqin.letmego.CHANNEL_ALERT"
-const val CHANNEL_TRACKING_FOREGROUND_SERVICE = "CHANNEL_TRACKING_FOREGROUND_SERVICE"
 
 class App : Application() {
     override fun onCreate() {
