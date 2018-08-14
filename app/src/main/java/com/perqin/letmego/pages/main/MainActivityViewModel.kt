@@ -11,10 +11,10 @@ import com.perqin.letmego.data.place.Place
 import com.perqin.letmego.data.place.PlaceNotifier
 import com.perqin.letmego.data.placeinfo.PlaceInfo
 import com.perqin.letmego.data.preferences.PreferencesRepo
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.withContext
+import kotlinx.coroutines.CommonPool
+import kotlinx.coroutines.android.UI
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivityViewModel : ViewModel() {
     private val myLocationFromLocator: LiveData<Place> = Transformations.map(TencentLocator.getLocation()) {

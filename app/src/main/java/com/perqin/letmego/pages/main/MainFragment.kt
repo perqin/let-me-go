@@ -121,6 +121,7 @@ class MainFragment : Fragment() {
         @Suppress("DEPRECATION")
         myLocationMarker = tencentMap.addMarker(MarkerOptions().apply {
             icon(BitmapDescriptorFactory.fromBitmap(createBitmapFromDrawableRes(context!!, R.drawable.my_location_marker)))
+            zIndex(Z_INDEX_MY_LOCATION)
         })
 
         activityViewModel = ViewModelProviders.of(activity!!).get(MainActivityViewModel::class.java)
@@ -217,7 +218,11 @@ class MainFragment : Fragment() {
     private fun showSelectedPlaceMarker(place: Place) {
         val latLng = LatLng(place.latitude, place.longitude)
         if (selectedPlaceMarker == null) {
-            selectedPlaceMarker = tencentMap.addMarker(MarkerOptions(latLng))
+            selectedPlaceMarker = tencentMap.addMarker(MarkerOptions(latLng).apply {
+                icon(BitmapDescriptorFactory.fromBitmap(createBitmapFromDrawableRes(context!!, R.drawable.ic_place_black_24dp)))
+                anchor(0.5F, 1.0F)
+                zIndex(Z_INDEX_SELECTED)
+            })
         } else {
             selectedPlaceMarker!!.position = latLng
         }
@@ -233,18 +238,19 @@ class MainFragment : Fragment() {
         if (destinationMarker == null) {
             destinationMarker = tencentMap.addMarker(MarkerOptions(latLng).apply {
                 icon(BitmapDescriptorFactory.fromBitmap(createBitmapFromDrawableRes(context!!, R.drawable.destination_marker)))
+                zIndex(Z_INDEX_DESTINATION)
             })
         } else {
             destinationMarker!!.position = latLng
         }
         if (destinationRangeCircle == null) {
-            destinationRangeCircle = tencentMap.addCircle(
-                    CircleOptions()
-                            .center(latLng)
-                            .radius(500.0)
-                            .strokeWidth(0F)
-                            .fillColor(Color.parseColor("#7F009688"))
-            )
+            destinationRangeCircle = tencentMap.addCircle(CircleOptions().apply {
+                center(latLng)
+                radius(500.0)
+                strokeWidth(0F)
+                fillColor(Color.parseColor("#7F009688"))
+                zIndex(Z_INDEX_DESTINATION_RANGE)
+            })
         } else {
             destinationRangeCircle!!.center = latLng
         }
@@ -253,11 +259,17 @@ class MainFragment : Fragment() {
     private fun hideDestinationMarker() {
         destinationMarker?.remove()
         destinationMarker = null
+        destinationRangeCircle?.remove()
+        destinationRangeCircle = null
     }
 
     companion object {
         fun newInstance() = MainFragment()
 
         private const val REQUEST_ALL_PERMISSIONS = 1
+        private const val Z_INDEX_DESTINATION_RANGE = 1
+        private const val Z_INDEX_DESTINATION = 2F
+        private const val Z_INDEX_MY_LOCATION = 10F
+        private const val Z_INDEX_SELECTED = 20F
     }
 }
