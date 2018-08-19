@@ -52,14 +52,14 @@
         <!-- BEGIN: Tencent LBS SDK -->
         <meta-data
             android:name="TencentMapSDK"
-            android:value="${TENCENT_LBS_KEY}" />
+            android:value="${tencentLbsKey}" />
         <!-- END: Tencent LBS SDK -->
 
 
         <!-- BEGIN: Tencent Bugly -->
         <meta-data
             android:name="BUGLY_APPID"
-            android:value="ecd08232e7" />
+            android:value="${buglyAppId}" />
         <meta-data
             android:name="BUGLY_APP_CHANNEL"
             android:value="coolapk" />

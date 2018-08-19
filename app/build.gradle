@@ -23,7 +23,8 @@ android {
         // FIXME: Consider using different credentials for debug and release build
         buildConfigField("String", "TENCENT_LBS_KEY", "\"${rootProject.ext.release.tencentLbsKey}\"")
         manifestPlaceholders = [
-                TENCENT_LBS_KEY: "${rootProject.ext.release.tencentLbsKey}"
+                tencentLbsKey: "${rootProject.ext.release.tencentLbsKey}",
+                buglyAppId: "${rootProject.ext.release.buglyAppId}",
         ]
     }
     signingConfigs {
