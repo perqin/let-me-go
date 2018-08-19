@@ -20,8 +20,24 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
-# TODO: Tencent LBS Map3D SDK: http://lbs.qq.com/android_v1/guide-project-setup.html
-# TODO: Tencent LBS Location SDK: http://lbs.qq.com/geo/guide-install.html
+# Tencent LBS Map3D SDK
+-keep class com.tencent.tencentmap.**{*;}
+-keep class com.tencent.map.**{*;}
+-keep class com.tencent.beacontmap.**{*;}
+-keep class navsns.**{*;}
+-dontwarn com.qq.**
+-dontwarn com.tencent.beacon.**
+
+# Tencent LBS Location SDK
+-keepclassmembers class ** {
+    public void on*Event(...);
+}
+-keep class c.t.**{*;}
+-keep class com.tencent.map.geolocation.**{*;}
+-keep class com.tencent.tencentmap.lbssdk.service.**{*;}
+
+-dontwarn  org.eclipse.jdt.annotation.**
+-dontwarn  c.t.**
 
 # KotlinX Coroutines
 -keepclassmembernames class kotlinx.** {

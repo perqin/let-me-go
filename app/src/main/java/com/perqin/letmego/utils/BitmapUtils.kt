@@ -9,8 +9,8 @@ import androidx.annotation.DrawableRes
  * Created by perqin on 2018/08/03.
  */
 
-fun createBitmapFromDrawableRes(context: Context, @DrawableRes resId: Int): Bitmap {
-    val drawable = context.getDrawable(resId)
+fun createBitmapFromDrawableRes(context: Context, @DrawableRes resId: Int): Bitmap? {
+    val drawable = context.getDrawable(resId) ?: return null
     val canvas = Canvas()
     val bitmap = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
     canvas.setBitmap(bitmap)

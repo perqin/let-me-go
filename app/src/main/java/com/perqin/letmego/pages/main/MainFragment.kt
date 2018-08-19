@@ -64,7 +64,9 @@ class MainFragment : Fragment() {
 
         grantPermissionsButton.setOnClickListener {
             var array = emptyArray<String>()
-            MainActivityViewModel.permissionsList.forEach { array += it }
+            MainActivityViewModel.permissionsList.forEach { permission ->
+                array += permission
+            }
             requestPermissions(array, REQUEST_ALL_PERMISSIONS)
         }
 
@@ -155,8 +157,8 @@ class MainFragment : Fragment() {
                     val padding = context!!.resources.getDimensionPixelSize(R.dimen.map_camera_padding)
                     tencentMap.animateCamera(CameraUpdateFactory.newLatLngBoundsRect(
                             LatLngBounds.builder().apply {
-                                it.targets.forEach {
-                                    include(LatLng(it.latitude, it.longitude))
+                                it.targets.forEach { target ->
+                                    include(LatLng(target.latitude, target.longitude))
                                 }
                             }.build(),
                             padding, padding, padding, padding

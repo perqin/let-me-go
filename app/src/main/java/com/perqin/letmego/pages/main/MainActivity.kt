@@ -32,10 +32,8 @@ class MainActivity : AppCompatActivity() {
             }
         })
         viewModel.selectedPlaceInfo.observe(this, Observer {
-            if (it != null) {
-                placeTitleTextView.text = it.title
-                placeAddressTextView.text = it.address
-            }
+            placeTitleTextView.text = it?.title?: getString(R.string.point_on_map)
+            placeAddressTextView.text = it?.address?: ""
         })
         viewModel.cameraStatus.observe(this, Observer {
             when(it!!.mode) {

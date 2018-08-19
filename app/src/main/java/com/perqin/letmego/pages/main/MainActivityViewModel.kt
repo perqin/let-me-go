@@ -106,14 +106,14 @@ class MainActivityViewModel : ViewModel() {
         // This is the place displayed on screen, which should cause address search
         selectedPlace.observeForever {
             it?.run {
-                searchSelectedPlace(latitude, longitude)
+                _selectedPlaceInfo.value = null
+                searchSelectedPlace(latitude, longitude, suggestedName)
             }
         }
     }
 
     fun selectPlace(latitude: Double, longitude: Double, suggestedName: String? = null) {
-        _selectedPlace.value = Place(latitude, longitude)
-//        searchSelectedPlace(latitude, longitude, suggestedName)
+        _selectedPlace.value = Place(latitude, longitude, suggestedName)
     }
 
     private fun searchSelectedPlace(latitude: Double, longitude: Double, suggestedName: String? = null) {
@@ -123,8 +123,6 @@ class MainActivityViewModel : ViewModel() {
                     TencentLbsApi.searchPlaceInfo(Place(latitude, longitude), suggestedName)
                 }
             } catch (e: Exception) {
-                // TODO: Show error in UI
-                println("Error: ${e.message}")
             }
         }
     }
