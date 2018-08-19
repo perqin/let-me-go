@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.*
 import com.perqin.letmego.App
+import com.perqin.letmego.R
 import com.perqin.letmego.data.api.TencentLbsApi
 import com.perqin.letmego.data.location.TencentLocator
 import com.perqin.letmego.data.place.Place
@@ -36,7 +37,10 @@ class MainActivityViewModel : ViewModel() {
     val destination: LiveData<Place?> = PlaceNotifier.getDestinationLiveData()
 
     private val _selectedPlace = MutableLiveData<Place?>()
-    val selectedPlace: LiveData<Place?> = object : MediatorLiveData<Place?>() {
+    val selectedPlace: LiveData<Place?> = _selectedPlace
+
+    // The info card may show information for pin selected place or destination
+    private val _detailedPlace: LiveData<Place?> = object : MediatorLiveData<Place?>() {
         private var userSelectedPlace: Place? = null
         private var destination: Place? = null
 
@@ -55,17 +59,16 @@ class MainActivityViewModel : ViewModel() {
             value = userSelectedPlace?: destination
         }
     }
-
-    private val _selectedPlaceInfo = MutableLiveData<PlaceInfo?>()
-    val selectedPlaceInfo: LiveData<PlaceInfo?> = _selectedPlaceInfo
+    private val _detailedPlaceInfo = MutableLiveData<PlaceInfo?>()
+    val detailedPlaceInfo: LiveData<PlaceInfo?> = _detailedPlaceInfo
 
     val enableNotificationForSelectedPlace = object : LiveData<Boolean>() {
-        private var selectedPlace: Place? = null
+        private var detailedPlace: Place? = null
         private var destination: Place? = null
 
         init {
-            this@MainActivityViewModel.selectedPlace.observeForever {
-                this.selectedPlace = it
+            this@MainActivityViewModel._detailedPlace.observeForever {
+                this.detailedPlace = it
                 updateValue()
             }
             this@MainActivityViewModel.destination.observeForever {
@@ -75,9 +78,8 @@ class MainActivityViewModel : ViewModel() {
         }
 
         private fun updateValue() {
-            value = selectedPlace != null && destination != null &&
-                    selectedPlace!!.latitude == destination!!.latitude &&
-                    selectedPlace!!.longitude == destination!!.longitude
+            value = detailedPlace != null && destination != null &&
+                    Place.isEqual(detailedPlace!!, destination!!)
         }
     }
 
@@ -104,10 +106,12 @@ class MainActivityViewModel : ViewModel() {
         _cameraMode.observeForever { updateMapCameraStatus() }
         myLocation.observeForever { updateMapCameraStatus() }
         // This is the place displayed on screen, which should cause address search
-        selectedPlace.observeForever {
-            it?.run {
-                _selectedPlaceInfo.value = null
-                searchSelectedPlace(latitude, longitude, suggestedName)
+        _detailedPlace.observeForever {
+            if (it != null) {
+                _detailedPlaceInfo.value = PlaceInfo(it.suggestedName?: App.context.getString(R.string.point_on_map), "")
+                searchSelectedPlace(it.latitude, it.longitude, it.suggestedName)
+            } else {
+                _detailedPlaceInfo.value = null
             }
         }
     }
@@ -119,7 +123,7 @@ class MainActivityViewModel : ViewModel() {
     private fun searchSelectedPlace(latitude: Double, longitude: Double, suggestedName: String? = null) {
         launch(UI) {
             try {
-                _selectedPlaceInfo.value = withContext(CommonPool) {
+                _detailedPlaceInfo.value = withContext(CommonPool) {
                     TencentLbsApi.searchPlaceInfo(Place(latitude, longitude), suggestedName)
                 }
             } catch (e: Exception) {
@@ -131,8 +135,8 @@ class MainActivityViewModel : ViewModel() {
         _selectedPlace.value = null
     }
 
-    fun toggleEnableNotificationForSelectedPlace() {
-        selectedPlace.value?.let {
+    fun toggleEnableNotificationForDetailedPlace() {
+        _detailedPlace.value?.let {
             PlaceNotifier.setOrUnsetDestination(it)
         }
     }

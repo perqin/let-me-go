@@ -8,10 +8,13 @@ import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.UiThread
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -49,7 +52,8 @@ class MainFragment : Fragment() {
     private var destinationMarker: Marker? = null
     private var destinationRangeCircle: Circle? = null
     private var selectedPlaceMarker: Marker? = null
-    private var lockMapCamera: Boolean = false
+    private var lockMapCamera = false
+    private val mapOnClickBlocker = DelayBlocker()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -75,7 +79,9 @@ class MainFragment : Fragment() {
             setLogoPosition(TencentMapOptions.LOGO_POSITION_BOTTOM_LEFT)
         }
         tencentMap.setOnMapClickListener {
-            activityViewModel.deselectPlace()
+            if (!mapOnClickBlocker.isBlocked()) {
+                activityViewModel.deselectPlace()
+            }
         }
         tencentMap.setOnMapLongClickListener {
             activityViewModel.selectPlace(it.latitude, it.longitude)
@@ -117,6 +123,9 @@ class MainFragment : Fragment() {
             }
         })
         tencentMap.setOnMapPoiClickListener {
+            // Block for a short time to avoid map's onClickListener being called after this listener is called.
+            // This is due to the wrong design of Tencent LBS SDK.
+            mapOnClickBlocker.block()
             activityViewModel.selectPlace(it.position.latitude, it.position.longitude, it.name)
         }
 
@@ -167,7 +176,6 @@ class MainFragment : Fragment() {
             }
         })
         activityViewModel.allPermissionsGranted.observe(this, Observer {
-            println("MainFragment: $it")
             permissionsGuideConstraintLayout.visibility = if (it) View.GONE else View.VISIBLE
             if (it && trackingService == null) {
                 context!!.run {
@@ -273,5 +281,21 @@ class MainFragment : Fragment() {
         private const val Z_INDEX_DESTINATION = 2F
         private const val Z_INDEX_MY_LOCATION = 10F
         private const val Z_INDEX_SELECTED = 20F
+    }
+
+    @UiThread
+    private class DelayBlocker(private var blocked: Boolean = false, val delay: Long = 500L) {
+        private val handler = Handler(Looper.getMainLooper())
+        private val runnable = {
+            blocked = false
+        }
+
+        fun block() {
+            blocked = true
+            handler.removeCallbacks(runnable)
+            handler.postDelayed(runnable, delay)
+        }
+
+        fun isBlocked() = blocked
     }
 }

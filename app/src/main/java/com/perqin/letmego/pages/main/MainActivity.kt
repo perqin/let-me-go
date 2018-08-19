@@ -24,16 +24,12 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         viewModel = ViewModelProviders.of(this).get(MainActivityViewModel::class.java)
-        viewModel.selectedPlace.observe(this, Observer {
+        viewModel.detailedPlaceInfo.observe(this, Observer {
             if (it != null) {
-                showDetail("(${it.latitude}, ${it.longitude})")
+                showDetail(it.title, it.address)
             } else {
                 hideDetail()
             }
-        })
-        viewModel.selectedPlaceInfo.observe(this, Observer {
-            placeTitleTextView.text = it?.title?: getString(R.string.point_on_map)
-            placeAddressTextView.text = it?.address?: ""
         })
         viewModel.cameraStatus.observe(this, Observer {
             when(it!!.mode) {
@@ -72,7 +68,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         notifyImageButton.setOnClickListener {
-            viewModel.toggleEnableNotificationForSelectedPlace()
+            viewModel.toggleEnableNotificationForDetailedPlace()
         }
 
         if (savedInstanceState == null) {
@@ -89,15 +85,18 @@ class MainActivity : AppCompatActivity() {
         viewModel.activityDestroy()
     }
 
-    private fun showDetail(title: String) {
+    private fun showDetail(title: String, address: String) {
         placeTitleTextView.text = title
-        placeDetailConstraintLayout.visibility = View.VISIBLE
-        ObjectAnimator
-                .ofFloat(placeDetailConstraintLayout, "translationY", 0F)
-                .apply {
-                    duration = 500
-                }
-                .start()
+        placeAddressTextView.text = address
+        if (placeDetailConstraintLayout.visibility != View.VISIBLE) {
+            placeDetailConstraintLayout.visibility = View.VISIBLE
+            ObjectAnimator
+                    .ofFloat(placeDetailConstraintLayout, "translationY", 0F)
+                    .apply {
+                        duration = 500
+                    }
+                    .start()
+        }
     }
 
     private fun hideDetail() {
