@@ -6,13 +6,15 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.perqin.letmego.App
 import com.perqin.letmego.R
+import com.perqin.letmego.pages.main.MainActivity
 import com.perqin.letmego.receiver.NotificationReceiver
 
 /**
  * @author perqin
  */
 const val NOTIFICATION_ID_TRACKING_FOREGROUND_SERVICE = 1
-const val REQUEST_STOP_TRACKING = 100
+const val REQUEST_START_MAIN_ACTIVITY = 100
+const val REQUEST_STOP_TRACKING = 101
 const val CHANNEL_ALERT = "com.perqin.letmego.CHANNEL_ALERT"
 const val CHANNEL_TRACKING_FOREGROUND_SERVICE = "CHANNEL_TRACKING_FOREGROUND_SERVICE"
 
@@ -23,6 +25,8 @@ fun createTrackingForegroundServiceNotification(): Notification {
             .setContentTitle(context.getString(R.string.notification_title_tracking_foreground_service))
             .setContentText(context.getString(R.string.notification_text_tracking_foreground_service))
             .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setContentIntent(PendingIntent.getActivity(context, REQUEST_START_MAIN_ACTIVITY,
+                    Intent(context, MainActivity::class.java), 0))
             .build()
 }
 

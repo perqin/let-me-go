@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">我要下车！</string>
+    <string name="button_grant">授权</string>
+    <string name="text_let_me_go_requires_permissions">我要下车！ 集成了腾讯地图 SDK，因此需要获取部分权限以便正常工作。</string>
+    <string name="text_phone_permission">读取电话状态</string>
+    <string name="text_storage_permission">读写外部存储</string>
+    <string name="text_location_permission">访问设备地理位置</string>
+    <string name="point_on_map">地图上的点</string>
+    <string name="notification_title_tracking_foreground_service">正在追踪您往目的地的移动</string>
+    <string name="notification_text_tracking_foreground_service">点击这里查看详情。</string>
+    <string name="notification_title_arrival">您已抵达目的地！</string>
+    <string name="notification_text_arrival">点击这里结束。</string>
+</resources>
