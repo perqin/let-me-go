@@ -20,6 +20,11 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        // FIXME: Consider using different credentials for debug and release build
+        buildConfigField("String", "TENCENT_LBS_KEY", "\"${rootProject.ext.release.tencentLbsKey}\"")
+        manifestPlaceholders = [
+                TENCENT_LBS_KEY: "${rootProject.ext.release.tencentLbsKey}"
+        ]
     }
     signingConfigs {
         debug {
@@ -28,17 +33,20 @@ android {
             storeFile file("$rootDir/debug.keystore.jks")
             storePassword 'com.perqin.letmego'
         }
+        release {
+            keyAlias "${rootProject.ext.release.keyAlias}"
+            keyPassword "${rootProject.ext.release.keyPassword}"
+            storeFile file("${rootProject.ext.release.storeFile}")
+            storePassword "${rootProject.ext.release.storePassword}"
+        }
     }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
-            buildConfigField("String", "TENCENT_LBS_KEY", "\"LEJBZ-4RB6W-DPPRV-R65FD-SBNJZ-E6BBH\"")
-            manifestPlaceholders = [
-                    TENCENT_LBS_KEY: "LEJBZ-4RB6W-DPPRV-R65FD-SBNJZ-E6BBH"
-            ]
         }
         release {
-            minifyEnabled false
+            signingConfig signingConfigs.release
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }

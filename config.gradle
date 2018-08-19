@@ -1,0 +1,22 @@
+ext {
+    release = [
+            tencentLbsKey: "",
+            buglyAppId: "",
+            keyAlias: "",
+            keyPassword: "",
+            storeFile: "",
+            storePassword: "",
+    ]
+}
+
+try {
+    rootProject.file('config.properties').withInputStream {
+        Properties properties = new Properties()
+        properties.load(it)
+        properties.each {
+            ext.release[it.key] = it.value
+        }
+    }
+} catch(IOException e) {
+    logger.log(LogLevel.WARN, "Cannot load properties from file config.properties", e)
+}
