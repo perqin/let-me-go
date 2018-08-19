@@ -1,5 +1,6 @@
 package com.perqin.letmego.data.place
 
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.os.Vibrator
@@ -77,6 +78,10 @@ object PlaceNotifier {
             if (notificationStatus == 1) {
                 notificationStatus = 0
                 stopVibration()
+            }
+            // Clear notification
+            App.context.run {
+                (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(NOTIFICATION_ID_TRACKING_FOREGROUND_SERVICE)
             }
             // Stop locating if unnecessary
             if (!myLocationRequired) {

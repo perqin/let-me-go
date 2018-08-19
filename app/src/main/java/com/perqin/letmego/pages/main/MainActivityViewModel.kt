@@ -2,6 +2,7 @@ package com.perqin.letmego.pages.main
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.*
 import com.perqin.letmego.App
@@ -155,6 +156,12 @@ class MainActivityViewModel : ViewModel() {
     fun activityDestroy() {
         // Save current location for next startup
         PreferencesRepo.saveMyLocation(myLocation.value)
+        // Notice user
+        if (destination.value != null) {
+            App.context.run {
+                Toast.makeText(this, getString(R.string.toast_app_is_still_tracking), Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     fun rotateMapCameraMode() {

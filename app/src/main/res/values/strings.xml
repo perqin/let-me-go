@@ -10,4 +10,5 @@
     <string name="notification_text_tracking_foreground_service">Tap here to view detail.</string>
     <string name="notification_title_arrival">You\'ve reached the destination!</string>
     <string name="notification_text_arrival">Tap here to stop tracking.</string>
+    <string name="toast_app_is_still_tracking">The app is tracking for you at background</string>
 </resources>

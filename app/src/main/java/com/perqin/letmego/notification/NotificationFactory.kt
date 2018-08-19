@@ -21,7 +21,7 @@ const val CHANNEL_TRACKING_FOREGROUND_SERVICE = "CHANNEL_TRACKING_FOREGROUND_SER
 fun createTrackingForegroundServiceNotification(): Notification {
     val context = App.context
     return NotificationCompat.Builder(context, CHANNEL_TRACKING_FOREGROUND_SERVICE)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_stat_tracking)
             .setContentTitle(context.getString(R.string.notification_title_tracking_foreground_service))
             .setContentText(context.getString(R.string.notification_text_tracking_foreground_service))
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -33,7 +33,7 @@ fun createTrackingForegroundServiceNotification(): Notification {
 fun createArrivalNotification(): Notification {
     val context = App.context
     return NotificationCompat.Builder(context, CHANNEL_TRACKING_FOREGROUND_SERVICE)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_stat_arrive)
             .setContentTitle(context.getString(R.string.notification_title_arrival))
             .setContentText(context.getString(R.string.notification_text_arrival))
             .setPriority(NotificationCompat.PRIORITY_HIGH)

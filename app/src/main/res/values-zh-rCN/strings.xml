@@ -11,4 +11,5 @@
     <string name="notification_text_tracking_foreground_service">点击这里查看详情。</string>
     <string name="notification_title_arrival">您已抵达目的地！</string>
     <string name="notification_text_arrival">点击这里结束。</string>
+    <string name="toast_app_is_still_tracking">应用将在后台持续跟踪您</string>
 </resources>
