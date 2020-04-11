@@ -1,11 +1,13 @@
 package com.perqin.letmego.pages.main
 
-import android.Manifest
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ObjectAnimator
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
@@ -15,10 +17,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.UiThread
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentFactory
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import com.perqin.letmego.R
 import com.perqin.letmego.data.place.Place
 import com.perqin.letmego.services.TrackingService
@@ -29,6 +33,7 @@ import com.tencent.tencentmap.mapsdk.maps.SupportMapFragment
 import com.tencent.tencentmap.mapsdk.maps.TencentMap
 import com.tencent.tencentmap.mapsdk.maps.TencentMapOptions
 import com.tencent.tencentmap.mapsdk.maps.model.*
+import kotlinx.android.synthetic.main.layout_app_bar.*
 import kotlinx.android.synthetic.main.main_fragment.*
 
 class MainFragment : Fragment() {
@@ -47,17 +52,37 @@ class MainFragment : Fragment() {
 
     private lateinit var tencentMap: TencentMap
     private lateinit var myLocationMarker: Marker
-    private lateinit var activityViewModel: MainActivityViewModel
-    private lateinit var viewModel: MainFragmentViewModel
+    private val viewModel: MainFragmentViewModel by viewModels()
     private var destinationMarker: Marker? = null
     private var destinationRangeCircle: Circle? = null
     private var selectedPlaceMarker: Marker? = null
     private var lockMapCamera = false
     private val mapOnClickBlocker = DelayBlocker()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // Ensure that the SupportMapFragment is instantiated correctly
+        childFragmentManager.fragmentFactory = object : FragmentFactory() {
+            override fun instantiate(classLoader: ClassLoader, className: String): Fragment {
+                return if (SupportMapFragment::class.java.name == className) {
+                    SupportMapFragment.newInstance(context)
+                } else {
+                    super.instantiate(classLoader, className)
+                }
+            }
+        }
+    }
+
+    override fun onCreateView(
+            inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?,
+    ): View {
         return inflater.inflate(R.layout.main_fragment, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        (activity as AppCompatActivity).setSupportActionBar(toolbar)
     }
 
     /**
@@ -66,25 +91,17 @@ class MainFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        grantPermissionsButton.setOnClickListener {
-            var array = emptyArray<String>()
-            MainActivityViewModel.permissionsList.forEach { permission ->
-                array += permission
-            }
-            requestPermissions(array, REQUEST_ALL_PERMISSIONS)
-        }
-
         tencentMap = (childFragmentManager.findFragmentById(R.id.mapFragment) as SupportMapFragment).map
         tencentMap.uiSettings.apply {
             setLogoPosition(TencentMapOptions.LOGO_POSITION_BOTTOM_LEFT)
         }
         tencentMap.setOnMapClickListener {
             if (!mapOnClickBlocker.isBlocked()) {
-                activityViewModel.deselectPlace()
+                viewModel.deselectPlace()
             }
         }
         tencentMap.setOnMapLongClickListener {
-            activityViewModel.selectPlace(it.latitude, it.longitude)
+            viewModel.selectPlace(it.latitude, it.longitude)
         }
         tencentMap.addTencentMapGestureListener(object : TencentMapGestureAdapter() {
             override fun onDown(p0: Float, p1: Float): Boolean {
@@ -98,27 +115,27 @@ class MainFragment : Fragment() {
             }
 
             override fun onDoubleTap(p0: Float, p1: Float): Boolean {
-                activityViewModel.freeMapCamera()
+                viewModel.freeMapCamera()
                 return false
             }
 
             override fun onFling(p0: Float, p1: Float): Boolean {
-                activityViewModel.freeMapCamera()
+                viewModel.freeMapCamera()
                 return false
             }
 
             override fun onLongPress(p0: Float, p1: Float): Boolean {
-                activityViewModel.freeMapCamera()
+                viewModel.freeMapCamera()
                 return false
             }
 
             override fun onScroll(p0: Float, p1: Float): Boolean {
-                activityViewModel.freeMapCamera()
+                viewModel.freeMapCamera()
                 return false
             }
 
             override fun onSingleTap(p0: Float, p1: Float): Boolean {
-                activityViewModel.freeMapCamera()
+                viewModel.freeMapCamera()
                 return false
             }
         })
@@ -126,44 +143,92 @@ class MainFragment : Fragment() {
             // Block for a short time to avoid map's onClickListener being called after this listener is called.
             // This is due to the wrong design of Tencent LBS SDK.
             mapOnClickBlocker.block()
-            activityViewModel.selectPlace(it.position.latitude, it.position.longitude, it.name)
+            viewModel.selectPlace(it.position.latitude, it.position.longitude, it.name)
         }
 
         @Suppress("DEPRECATION")
-        myLocationMarker = tencentMap.addMarker(MarkerOptions().apply {
-            icon(BitmapDescriptorFactory.fromBitmap(createBitmapFromDrawableRes(context!!, R.drawable.my_location_marker)))
-            zIndex(Z_INDEX_MY_LOCATION)
+        val markerOptions = MarkerOptions()
+        markerOptions.icon(BitmapDescriptorFactory.fromBitmap(
+                createBitmapFromDrawableRes(requireContext(), R.drawable.my_location_marker)))
+        markerOptions.zIndex(Z_INDEX_MY_LOCATION)
+        myLocationMarker = tencentMap.addMarker(markerOptions)
+
+
+        viewModel.detailedPlaceInfo.observe(viewLifecycleOwner, Observer {
+            if (it != null) {
+                showDetail(it.title, it.address)
+            } else {
+                hideDetail()
+            }
+        })
+        viewModel.cameraStatus.observe(viewLifecycleOwner, Observer {
+            when(it!!.mode) {
+                MainFragmentViewModel.MapCameraMode.FREE -> {
+                    mapCameraModeFab.setImageResource(R.drawable.ic_my_location_black_24dp)
+                    mapCameraModeFab.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.tint_inactivate))
+                }
+                MainFragmentViewModel.MapCameraMode.CENTER_MY_LOCATION -> {
+                    mapCameraModeFab.setImageResource(R.drawable.ic_my_location_black_24dp)
+                    mapCameraModeFab.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.tint_activate))
+                }
+                MainFragmentViewModel.MapCameraMode.CENTER_TERMINALS -> {
+                    mapCameraModeFab.setImageResource(R.drawable.ic_center_focus_strong_black_24dp)
+                    mapCameraModeFab.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.tint_activate))
+                }
+                else -> {}
+            }
+        })
+        viewModel.enableNotificationForSelectedPlace.observe(viewLifecycleOwner, Observer {
+            notifyImageButton.setImageResource(
+                    if (it)
+                        R.drawable.ic_notifications_active_black_24dp
+                    else
+                        R.drawable.ic_notifications_none_black_24dp
+            )
+            notifyImageButton.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(),
+                    if (it)
+                        R.color.colorPrimary
+                    else
+                        R.color.black
+            ))
         })
 
-        activityViewModel = ViewModelProviders.of(activity!!).get(MainActivityViewModel::class.java)
-        activityViewModel.myLocation.observe(this, Observer {
+        mapCameraModeFab.setOnClickListener {
+            viewModel.rotateMapCameraMode()
+        }
+
+        notifyImageButton.setOnClickListener {
+            viewModel.toggleEnableNotificationForDetailedPlace()
+        }
+
+        viewModel.myLocation.observe(viewLifecycleOwner, Observer {
             myLocationMarker.position = LatLng(it.latitude, it.longitude)
         })
-        activityViewModel.destination.observe(this, Observer {
+        viewModel.destination.observe(viewLifecycleOwner, Observer {
             if (it != null) {
                 showDestinationMarker(it)
             } else {
                 hideDestinationMarker()
             }
         })
-        activityViewModel.selectedPlace.observe(this, Observer {
+        viewModel.selectedPlace.observe(viewLifecycleOwner, Observer {
             if (it != null) {
                 showSelectedPlaceMarker(it)
             } else {
                 hideSelectedPlaceMarker()
             }
         })
-        activityViewModel.cameraStatus.observe(this, Observer {
+        viewModel.cameraStatus.observe(viewLifecycleOwner, Observer {
             if (!lockMapCamera) {
-                if (it.mode == MainActivityViewModel.MapCameraMode.CENTER_MY_LOCATION && it.targets.isNotEmpty()) {
+                if (it.mode == MainFragmentViewModel.MapCameraMode.CENTER_MY_LOCATION && it.targets.isNotEmpty()) {
                     // Center it
                     tencentMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
                             LatLng(it.targets[0].latitude, it.targets[0].longitude),
                             15.0F
                     ))
-                } else if (it.mode == MainActivityViewModel.MapCameraMode.CENTER_TERMINALS && it.targets.size > 1) {
+                } else if (it.mode == MainFragmentViewModel.MapCameraMode.CENTER_TERMINALS && it.targets.size > 1) {
                     // Zoom to include all places
-                    val padding = context!!.resources.getDimensionPixelSize(R.dimen.map_camera_padding)
+                    val padding = resources.getDimensionPixelSize(R.dimen.map_camera_padding)
                     tencentMap.animateCamera(CameraUpdateFactory.newLatLngBoundsRect(
                             LatLngBounds.builder().apply {
                                 it.targets.forEach { target ->
@@ -175,61 +240,56 @@ class MainFragment : Fragment() {
                 }
             }
         })
-        activityViewModel.allPermissionsGranted.observe(this, Observer {
-            permissionsGuideConstraintLayout.visibility = if (it) View.GONE else View.VISIBLE
-            if (it && trackingService == null) {
-                context!!.run {
-                    bindService(Intent(this, TrackingService::class.java), serviceConnection, Context.BIND_AUTO_CREATE)
-                }
-            }
-        })
-        activityViewModel.grantedPermissions.observe(this, Observer {
-            val red = ContextCompat.getColor(context!!, R.color.red_500)
-            val green = ContextCompat.getColor(context!!, R.color.green_500)
-            phonePermissionTextView.setTextColor(
-                    if (it.containsAll(listOf(Manifest.permission.READ_PHONE_STATE)))
-                        green
-                    else
-                        red
-            )
-            locationPermissionTextView.setTextColor(
-                    if (it.containsAll(listOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)))
-                        green
-                    else
-                        red
-            )
-            storagePermissionTextView.setTextColor(
-                    if (it.containsAll(listOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)))
-                        green
-                    else
-                        red
-            )
-        })
 
-        viewModel = ViewModelProviders.of(this).get(MainFragmentViewModel::class.java)
+        if (trackingService == null) {
+            requireContext().run {
+                bindService(Intent(this, TrackingService::class.java), serviceConnection, Context.BIND_AUTO_CREATE)
+            }
+        }
+
+        viewModel.activityCreate()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         trackingService?.uiNotRequireMyLocationUpdates()
-        context!!.unbindService(serviceConnection)
+        requireContext().unbindService(serviceConnection)
+        viewModel.activityDestroy()
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        if (requestCode == REQUEST_ALL_PERMISSIONS) {
-            for (i in 0 until permissions.size) {
-                if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-                    activityViewModel.permissionsGranted(permissions[i])
-                }
-            }
+    private fun showDetail(title: String, address: String) {
+        placeTitleTextView.text = title
+        placeAddressTextView.text = address
+        if (placeDetailConstraintLayout.visibility != View.VISIBLE) {
+            placeDetailConstraintLayout.visibility = View.VISIBLE
+            ObjectAnimator
+                    .ofFloat(placeDetailConstraintLayout, "translationY", 0F)
+                    .apply {
+                        duration = 500
+                    }
+                    .start()
         }
+    }
+
+    private fun hideDetail() {
+        ObjectAnimator
+                .ofFloat(placeDetailConstraintLayout, "translationY", placeDetailConstraintLayout.height.toFloat())
+                .apply {
+                    duration = 500
+                    addListener(object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: Animator?) {
+                            placeDetailConstraintLayout.visibility = View.GONE
+                        }
+                    })
+                }
+                .start()
     }
 
     private fun showSelectedPlaceMarker(place: Place) {
         val latLng = LatLng(place.latitude, place.longitude)
         if (selectedPlaceMarker == null) {
             selectedPlaceMarker = tencentMap.addMarker(MarkerOptions(latLng).apply {
-                icon(BitmapDescriptorFactory.fromBitmap(createBitmapFromDrawableRes(context!!, R.drawable.ic_place_black_24dp)))
+                icon(BitmapDescriptorFactory.fromBitmap(createBitmapFromDrawableRes(requireContext(), R.drawable.ic_place_black_24dp)))
                 anchor(0.5F, 1.0F)
                 zIndex(Z_INDEX_SELECTED)
             })
@@ -247,7 +307,7 @@ class MainFragment : Fragment() {
         val latLng = LatLng(place.latitude, place.longitude)
         if (destinationMarker == null) {
             destinationMarker = tencentMap.addMarker(MarkerOptions(latLng).apply {
-                icon(BitmapDescriptorFactory.fromBitmap(createBitmapFromDrawableRes(context!!, R.drawable.destination_marker)))
+                icon(BitmapDescriptorFactory.fromBitmap(createBitmapFromDrawableRes(requireContext(), R.drawable.destination_marker)))
                 zIndex(Z_INDEX_DESTINATION)
             })
         } else {
@@ -275,8 +335,6 @@ class MainFragment : Fragment() {
 
     companion object {
         fun newInstance() = MainFragment()
-
-        private const val REQUEST_ALL_PERMISSIONS = 1
         private const val Z_INDEX_DESTINATION_RANGE = 1
         private const val Z_INDEX_DESTINATION = 2F
         private const val Z_INDEX_MY_LOCATION = 10F

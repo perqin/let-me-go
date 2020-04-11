@@ -11,4 +11,6 @@
     <string name="notification_title_arrival">You\'ve reached the destination!</string>
     <string name="notification_text_arrival">Tap here to stop tracking.</string>
     <string name="toast_app_is_still_tracking">The app is tracking for you at background</string>
+    <string name="text_permissionsNotAllGranted">Permissions are not all granted.</string>
+    <string name="cd_toggleCameraMode">Toggle camera mode of the map</string>
 </resources>

@@ -8,10 +8,6 @@ apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 29
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
     defaultConfig {
         applicationId "com.perqin.letmego"
         minSdkVersion 21
@@ -26,6 +22,13 @@ android {
                 tencentLbsKey: "${rootProject.ext.release.tencentLbsKey}",
                 buglyAppId: "${rootProject.ext.release.buglyAppId}",
         ]
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = "1.8"
     }
     signingConfigs {
         debug {
@@ -56,6 +59,7 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'androidx.appcompat:appcompat:1.2.0-beta01'
+    implementation 'androidx.fragment:fragment-ktx:1.2.4'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'androidx.lifecycle:lifecycle-common-java8:2.2.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
@@ -65,7 +69,7 @@ dependencies {
     implementation 'androidx.room:room-runtime:2.2.5'
     implementation 'com.google.android.material:material:1.2.0-alpha05'
     implementation 'com.tencent.bugly:crashreport:2.4.0'
-    implementation 'com.tencent.map:tencent-map-vector-sdk:4.3.2'
+    implementation 'com.tencent.map:tencent-map-vector-sdk:4.3.3.4'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.5'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5'

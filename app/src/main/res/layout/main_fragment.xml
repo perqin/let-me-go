@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
@@ -7,87 +7,89 @@
     android:layout_height="match_parent"
     tools:context="com.perqin.letmego.pages.main.MainFragment">
 
-    <fragment
-        class="com.tencent.tencentmap.mapsdk.maps.SupportMapFragment"
+    <include layout="@layout/layout_app_bar" />
+
+    <androidx.fragment.app.FragmentContainerView
         android:id="@+id/mapFragment"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:name="com.tencent.tencentmap.mapsdk.maps.SupportMapFragment"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/permissionsGuideConstraintLayout"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="#FFFFFF"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:id="@+id/placeDetailConstraintLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="@android:color/background_light"
+        android:visibility="gone"
+        app:layout_insetEdge="bottom"
+        tools:visibility="visible">
 
         <TextView
-            style="@style/TextAppearance.AppCompat.Body2"
-            android:id="@+id/permissionsTitleTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAlignment="center"
-            android:text="@string/text_let_me_go_requires_permissions"
-            app:layout_constraintVertical_chainStyle="packed"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            style="@style/TextAppearance.AppCompat.Title"
+            android:id="@+id/placeTitleTextView"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/phonePermissionTextView" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/favoriteImageButton"
+            tools:text="公司" />
+
+        <!-- TODO: Enable fav feature -->
+        <ImageButton
+            android:id="@+id/favoriteImageButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_star_border_black_24dp"
+            android:background="?attr/selectableItemBackground"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/notifyImageButton"
+            tools:visibility="visible" />
+
+        <ImageButton
+            android:id="@+id/notifyImageButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_notifications_none_black_24dp"
+            android:background="?attr/selectableItemBackground"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <TextView
-            style="@style/TextAppearance.AppCompat.Body1"
-            android:id="@+id/phonePermissionTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAlignment="center"
-            android:text="@string/text_phone_permission"
-            android:textColor="@color/red_500"
+            android:id="@+id/placeAddressTextView"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:gravity="center_vertical"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/permissionsTitleTextView"
-            app:layout_constraintBottom_toTopOf="@id/locationPermissionTextView" />
-
-        <TextView
-            android:id="@+id/locationPermissionTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAlignment="center"
-            android:text="@string/text_location_permission"
-            android:textColor="@color/red_500"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/phonePermissionTextView"
-            app:layout_constraintBottom_toTopOf="@id/storagePermissionTextView" />
-
-        <TextView
-            android:id="@+id/storagePermissionTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAlignment="center"
-            android:text="@string/text_storage_permission"
-            android:textColor="@color/red_500"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/locationPermissionTextView"
-            app:layout_constraintBottom_toTopOf="@id/grantPermissionsButton" />
-
-        <Button
-            style="@style/Widget.AppCompat.Button.Colored"
-            android:id="@+id/grantPermissionsButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/button_grant"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/storagePermissionTextView"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/placeTitleTextView"
+            tools:text="深圳市南山区深南大道9988号" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/mapCameraModeFab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:layout_gravity="bottom|end"
+        android:src="@drawable/ic_my_location_black_24dp"
+        android:tint="@color/tint_inactivate"
+        android:backgroundTint="@android:color/white"
+        android:contentDescription="@string/cd_toggleCameraMode"
+        app:borderWidth="0dp" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
