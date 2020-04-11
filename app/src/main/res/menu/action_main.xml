@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/privacyPolicyItem"
+        android:title="@string/label_privacyPolicy" />
+    <item
+        android:id="@+id/aboutItem"
+        android:title="@string/label_about"
+        android:visible="false" />
+</menu>

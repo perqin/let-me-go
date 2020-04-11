@@ -13,4 +13,9 @@
     <string name="toast_app_is_still_tracking">The app is tracking for you at background</string>
     <string name="text_permissionsNotAllGranted">Permissions are not all granted.</string>
     <string name="cd_toggleCameraMode">Toggle camera mode of the map</string>
+    <string name="label_privacyPolicy">Privacy policy</string>
+    <string name="label_about">About</string>
+    <string name="label_accept">Accept</string>
+    <string name="richText_privacyPolicyMessage">使用本应用之前，您需要详细阅读并同意本应用的&lt;a href="%s">《隐私政策》&lt;/a>。点击“同意”代表您已经阅读并接受了本应用的隐私政策。</string>
+    <string name="label_exit">Exit</string>
 </resources>
