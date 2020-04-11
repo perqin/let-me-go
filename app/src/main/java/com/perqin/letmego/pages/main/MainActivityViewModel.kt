@@ -13,8 +13,7 @@ import com.perqin.letmego.data.place.Place
 import com.perqin.letmego.data.place.PlaceNotifier
 import com.perqin.letmego.data.placeinfo.PlaceInfo
 import com.perqin.letmego.data.preferences.PreferencesRepo
-import kotlinx.coroutines.CommonPool
-import kotlinx.coroutines.android.UI
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -122,9 +121,9 @@ class MainActivityViewModel : ViewModel() {
     }
 
     private fun searchSelectedPlace(latitude: Double, longitude: Double, suggestedName: String? = null) {
-        launch(UI) {
+        viewModelScope.launch {
             try {
-                _detailedPlaceInfo.value = withContext(CommonPool) {
+                _detailedPlaceInfo.value = withContext(Dispatchers.IO) {
                     TencentLbsApi.searchPlaceInfo(Place(latitude, longitude), suggestedName)
                 }
             } catch (e: Exception) {
@@ -165,8 +164,7 @@ class MainActivityViewModel : ViewModel() {
     }
 
     fun rotateMapCameraMode() {
-        val currentMode = cameraStatus.value?.mode
-        when (currentMode) {
+        when (cameraStatus.value?.mode) {
             MapCameraMode.FREE -> _cameraMode.value = MapCameraMode.CENTER_MY_LOCATION
             MapCameraMode.CENTER_MY_LOCATION -> _cameraMode.value = if (destination.value != null) {
                 MapCameraMode.CENTER_TERMINALS

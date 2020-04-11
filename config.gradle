@@ -1,22 +1,27 @@
-ext {
-    release = [
-            tencentLbsKey: "",
-            buglyAppId: "",
-            keyAlias: "",
-            keyPassword: "",
-            storeFile: "",
-            storePassword: "",
-    ]
+/**
+ * Get build parameter in the following priority:
+ * + Environment variable
+ * + Gradle properties (gradle.properties)
+ * + credentials.properties
+ * For simplicity, no 'dot' is allowed
+ */
+def prop = null
+def propFile = rootProject.file("local.properties")
+if (propFile.canRead()) {
+    prop = new Properties()
+    prop.load(new FileInputStream(propFile))
+}
+def getParameter = { name ->
+    return System.getenv(name) ?: project.findProperty(name) ?: (prop?.getProperty(name)) ?: ''
 }
 
-try {
-    rootProject.file('config.properties').withInputStream {
-        Properties properties = new Properties()
-        properties.load(it)
-        properties.each {
-            ext.release[it.key] = it.value
-        }
-    }
-} catch(IOException e) {
-    logger.log(LogLevel.WARN, "Cannot load properties from file config.properties", e)
+ext {
+    release = [
+            tencentLbsKey: getParameter('tencentLbsKey'),
+            buglyAppId: getParameter('buglyAppId'),
+            keyAlias: getParameter('keyAlias'),
+            keyPassword: getParameter('keyPassword'),
+            storeFile: getParameter('storeFile'),
+            storePassword: getParameter('storePassword'),
+    ]
 }
