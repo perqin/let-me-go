@@ -12,9 +12,8 @@ android {
         applicationId "com.perqin.letmego"
         minSdkVersion 21
         targetSdkVersion 28
-        // TODO: Set versionCode and versionName dynamically
-        versionCode 100001
-        versionName "1.0.0-coolapk"
+        versionCode 1_00_01_1
+        versionName "1.0.1-coolapk"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         // FIXME: Consider using different credentials for debug and release build
         buildConfigField("String", "TENCENT_LBS_KEY", "\"${rootProject.ext.release.tencentLbsKey}\"")
