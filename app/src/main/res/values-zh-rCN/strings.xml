@@ -12,4 +12,11 @@
     <string name="notification_title_arrival">您已抵达目的地！</string>
     <string name="notification_text_arrival">点击这里结束。</string>
     <string name="toast_app_is_still_tracking">应用将在后台持续跟踪您</string>
+    <string name="text_permissionsNotAllGranted">没有授予必要权限</string>
+    <string name="cd_toggleCameraMode">切换地图的相机模式</string>
+    <string name="label_privacyPolicy">隐私政策</string>
+    <string name="label_about">关于</string>
+    <string name="label_accept">接受</string>
+    <string name="label_exit">退出</string>
+    <string name="richText_privacyPolicyMessage">使用本应用之前，您需要详细阅读并同意本应用的&lt;a href="%s">《隐私政策》&lt;/a>。点击“接受”代表您已经阅读并接受了本应用的隐私政策。</string>
 </resources>
