@@ -45,22 +45,22 @@
             app:layout_constraintEnd_toStartOf="@id/favoriteImageButton"
             tools:text="公司" />
 
-        <!-- TODO: Enable fav feature -->
         <ImageButton
             android:id="@+id/favoriteImageButton"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:src="@drawable/ic_star_border_black_24dp"
+            android:tint="?attr/colorControlNormal"
             android:background="?attr/selectableItemBackground"
-            android:visibility="gone"
+            android:contentDescription="@string/cd_favorite"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/notifyImageButton"
-            tools:visibility="visible" />
+            app:layout_constraintEnd_toStartOf="@id/notifyImageButton" />
 
         <ImageButton
             android:id="@+id/notifyImageButton"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            android:contentDescription="@string/cd_notify"
             android:src="@drawable/ic_notifications_none_black_24dp"
             android:background="?attr/selectableItemBackground"
             app:layout_constraintTop_toTopOf="parent"

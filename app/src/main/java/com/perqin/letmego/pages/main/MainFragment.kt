@@ -83,13 +83,6 @@ class MainFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         (activity as AppCompatActivity).setSupportActionBar(toolbar)
-    }
-
-    /**
-     * This can be regarded as activity.onCreate
-     */
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
 
         tencentMap = (childFragmentManager.findFragmentById(R.id.mapFragment) as SupportMapFragment).map
         tencentMap.uiSettings.apply {
@@ -153,7 +146,6 @@ class MainFragment : Fragment() {
         markerOptions.zIndex(Z_INDEX_MY_LOCATION)
         myLocationMarker = tencentMap.addMarker(markerOptions)
 
-
         viewModel.detailedPlaceInfo.observe(viewLifecycleOwner, Observer {
             if (it != null) {
                 showDetail(it.title, it.address)
@@ -178,6 +170,12 @@ class MainFragment : Fragment() {
                 else -> {}
             }
         })
+        viewModel.isFavoriteForSelectedPlace.observe(viewLifecycleOwner, Observer {
+            favoriteImageButton.setImageResource(if (it)
+                R.drawable.ic_baseline_star_24
+            else
+                R.drawable.ic_star_border_black_24dp)
+        })
         viewModel.enableNotificationForSelectedPlace.observe(viewLifecycleOwner, Observer {
             notifyImageButton.setImageResource(
                     if (it)
@@ -196,7 +194,9 @@ class MainFragment : Fragment() {
         mapCameraModeFab.setOnClickListener {
             viewModel.rotateMapCameraMode()
         }
-
+        favoriteImageButton.setOnClickListener {
+            viewModel.toggleFavoriteForDetailedPlace()
+        }
         notifyImageButton.setOnClickListener {
             viewModel.toggleEnableNotificationForDetailedPlace()
         }

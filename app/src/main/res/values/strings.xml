@@ -18,4 +18,7 @@
     <string name="label_accept">Accept</string>
     <string name="richText_privacyPolicyMessage">Before using this application, you must read our &lt;a href="%s">Privacy Policy&lt;/a> carefully and accept it. Clicking "Accept" means that you have accepted the Privacy Policy.</string>
     <string name="label_exit">Exit</string>
+    <string name="cd_favorite">Favorite</string>
+    <string name="cd_notify">Notify</string>
+    <string name="text_failToOperate">Fail to operate</string>
 </resources>

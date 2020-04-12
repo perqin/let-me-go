@@ -67,7 +67,9 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.0-alpha01'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.0-alpha01'
     implementation 'androidx.recyclerview:recyclerview:1.2.0-alpha02'
-    implementation 'androidx.room:room-runtime:2.2.5'
+    def roomVersion = '2.2.5'
+    implementation "androidx.room:room-runtime:$roomVersion"
+    implementation "androidx.room:room-ktx:$roomVersion"
     implementation 'com.google.android.material:material:1.2.0-alpha05'
     implementation 'com.tencent.bugly:crashreport:2.4.0'
     implementation 'com.tencent.map:tencent-map-vector-sdk:4.3.3.4'

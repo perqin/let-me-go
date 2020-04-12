@@ -2,6 +2,8 @@ package com.perqin.letmego.data.destination
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
 import androidx.room.Query
 
 /**
@@ -12,4 +14,16 @@ import androidx.room.Query
 interface DestinationDao {
     @Query("SELECT * FROM destination")
     fun getAllLiveDestinations(): LiveData<List<Destination>>
+
+    @Query("SELECT COUNT(id) FROM destination WHERE (ABS(latitude - :latitude) <= ${Destination.MINIMAL_DEGREE}) AND (ABS(longitude - :longitude) <= ${Destination.MINIMAL_DEGREE})")
+    fun countLiveDestination(latitude: Double, longitude: Double): LiveData<Int>
+
+    @Query("SELECT * FROM destination WHERE (ABS(latitude - :latitude) <= ${Destination.MINIMAL_DEGREE}) AND (ABS(longitude - :longitude) <= ${Destination.MINIMAL_DEGREE})")
+    suspend fun getDestinationsAt(latitude: Double, longitude: Double): List<Destination>
+
+    @Insert
+    suspend fun add(vararg destination: Destination)
+
+    @Delete
+    suspend fun remove(vararg destination: Destination)
 }

@@ -1,10 +1,12 @@
 package com.perqin.letmego.pages.main
 
+import android.app.Application
 import android.widget.Toast
 import androidx.lifecycle.*
 import com.perqin.letmego.App
 import com.perqin.letmego.R
 import com.perqin.letmego.data.api.TencentLbsApi
+import com.perqin.letmego.data.destination.DestinationRepo
 import com.perqin.letmego.data.location.TencentLocator
 import com.perqin.letmego.data.place.Place
 import com.perqin.letmego.data.place.PlaceNotifier
@@ -14,7 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class MainFragmentViewModel : ViewModel() {
+class MainFragmentViewModel(application: Application) : AndroidViewModel(application) {
     private val myLocationFromLocator: LiveData<Place> = Transformations.map(TencentLocator.getLocation()) {
         Place(it.latitude, it.longitude)
     }
@@ -58,6 +60,14 @@ class MainFragmentViewModel : ViewModel() {
     }
     private val _detailedPlaceInfo = MutableLiveData<PlaceInfo?>()
     val detailedPlaceInfo: LiveData<PlaceInfo?> = _detailedPlaceInfo
+
+    val isFavoriteForSelectedPlace = Transformations.switchMap(_detailedPlace) {
+        if (it == null) {
+            MutableLiveData<Boolean>().apply { value = false }
+        } else {
+            DestinationRepo.isDestinationExisting(it)
+        }
+    }
 
     val enableNotificationForSelectedPlace = object : LiveData<Boolean>() {
         private var detailedPlace: Place? = null
@@ -122,6 +132,22 @@ class MainFragmentViewModel : ViewModel() {
 
     fun deselectPlace() {
         _selectedPlace.value = null
+    }
+
+    fun toggleFavoriteForDetailedPlace() {
+        val detailedPlace = _detailedPlace.value?:return
+        viewModelScope.launch {
+            val isFavorite = isFavoriteForSelectedPlace.value?:false
+            try {
+                if (isFavorite) {
+                    DestinationRepo.remove(detailedPlace)
+                } else {
+                    DestinationRepo.add(detailedPlace)
+                }
+            } catch (e: Exception) {
+                Toast.makeText(getApplication(), R.string.text_failToOperate, Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     fun toggleEnableNotificationForDetailedPlace() {
