@@ -24,6 +24,7 @@ import androidx.fragment.app.FragmentFactory
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import com.perqin.letmego.R
+import com.perqin.letmego.data.destination.Destination
 import com.perqin.letmego.data.place.Place
 import com.perqin.letmego.services.TrackingService
 import com.perqin.letmego.ui.destinationlist.DestinationListFragment
@@ -335,6 +336,10 @@ class MainFragment : Fragment() {
         destinationMarker = null
         destinationRangeCircle?.remove()
         destinationRangeCircle = null
+    }
+
+    fun selectDestination(destination: Destination) {
+        viewModel.selectPlace(destination.latitude, destination.longitude, destination.displayName)
     }
 
     companion object {

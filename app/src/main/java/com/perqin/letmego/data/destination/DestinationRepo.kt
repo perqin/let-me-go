@@ -27,4 +27,14 @@ object DestinationRepo {
     suspend fun remove(place: Place) {
         dao.remove(*dao.getDestinationsAt(place.latitude, place.longitude).toTypedArray())
     }
+
+    fun getAllLiveDestinations() = dao.getAllLiveDestinations()
+
+    suspend fun updateRemarkOfDestination(destination: Destination, newRemark: String) {
+        dao.updateRemarkOfDestination(Destination(destination.id, destination.latitude, destination.longitude, newRemark))
+    }
+
+    suspend fun deleteDestination(destination: Destination) {
+        dao.deleteDestination(destination)
+    }
 }

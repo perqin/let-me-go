@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/editRemarkItem"
+        android:title="@string/label_editRemark" />
+    <item
+        android:id="@+id/copyIdItem"
+        android:title="@string/label_copyId" />
+    <item
+        android:id="@+id/deleteItem"
+        android:title="@string/label_un_favorite" />
+</menu>

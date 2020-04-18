@@ -19,5 +19,18 @@
     <string name="label_accept">接受</string>
     <string name="label_exit">退出</string>
     <string name="richText_privacyPolicyMessage">使用本应用之前，您需要详细阅读并同意本应用的&lt;a href="%s">《隐私政策》&lt;/a>。点击“接受”代表您已经阅读并接受了本应用的隐私政策。</string>
-    <string name="cd_openFavoriteList">Open favorite list</string>
+    <string name="cd_openFavoriteList">打开收藏列表</string>
+    <string name="label_favoriteDestinationList">收藏的地点</string>
+    <string name="text_noFavoriteDestinations">没有收藏的地点。</string>
+    <string name="cd_destinationMenuButton">地点菜单按钮</string>
+    <string name="cd_favorite">收藏</string>
+    <string name="cd_notify">通知</string>
+    <string name="text_failToOperate">操作失败</string>
+    <string name="label_editRemark">修改备注</string>
+    <string name="label_copyId">复制ID</string>
+    <string name="label_un_favorite">取消收藏</string>
+    <string name="label_save">修改</string>
+    <string name="label_cancel">取消</string>
+    <string name="label_destinationId">地点ID</string>
+    <string name="label_remark">备注</string>
 </resources>

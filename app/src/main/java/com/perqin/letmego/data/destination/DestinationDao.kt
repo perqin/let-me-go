@@ -1,10 +1,7 @@
 package com.perqin.letmego.data.destination
 
 import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.Query
+import androidx.room.*
 
 /**
  * Created by perqinxie on 2018/07/20.
@@ -26,4 +23,10 @@ interface DestinationDao {
 
     @Delete
     suspend fun remove(vararg destination: Destination)
+
+    @Update
+    suspend fun updateRemarkOfDestination(vararg destination: Destination)
+
+    @Delete
+    suspend fun deleteDestination(vararg destination: Destination)
 }

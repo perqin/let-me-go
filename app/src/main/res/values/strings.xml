@@ -22,4 +22,14 @@
     <string name="cd_notify">Notify</string>
     <string name="text_failToOperate">Fail to operate</string>
     <string name="cd_openFavoriteList">Open favorite list</string>
+    <string name="label_favoriteDestinationList">Favorite destinations</string>
+    <string name="text_noFavoriteDestinations">No favorite destinations.</string>
+    <string name="cd_destinationMenuButton">Destination menu button</string>
+    <string name="label_editRemark">Edit remark</string>
+    <string name="label_copyId">Copy ID</string>
+    <string name="label_un_favorite">Un-favorite</string>
+    <string name="label_save">Save</string>
+    <string name="label_cancel">Cancel</string>
+    <string name="label_destinationId">Destination ID</string>
+    <string name="label_remark">Remark</string>
 </resources>

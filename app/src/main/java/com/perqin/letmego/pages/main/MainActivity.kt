@@ -12,12 +12,14 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
 import com.perqin.letmego.R
+import com.perqin.letmego.data.destination.Destination
 import com.perqin.letmego.data.preferences.PreferencesRepo
 import com.perqin.letmego.pages.main.permissions.PermissionsFragment
+import com.perqin.letmego.ui.destinationlist.DestinationListFragment
 import com.perqin.letmego.utils.permissionsAllGranted
 import com.perqin.letmego.utils.privacyPolicyUrl
 
-class MainActivity : AppCompatActivity(), PermissionsFragment.Callback {
+class MainActivity : AppCompatActivity(), PermissionsFragment.Callback, DestinationListFragment.Callback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
@@ -50,8 +52,12 @@ class MainActivity : AppCompatActivity(), PermissionsFragment.Callback {
 
     override fun onAllPermissionsGranted() {
         supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, MainFragment.newInstance())
+                .replace(R.id.fragmentContainerView, MainFragment.newInstance(), FRAGMENT_MAP)
                 .commit()
+    }
+
+    override fun onSelectDestination(destination: Destination) {
+        (supportFragmentManager.findFragmentByTag(FRAGMENT_MAP) as? MainFragment)?.selectDestination(destination)
     }
 
     private fun showPrivacyPolicy(requireAcceptance: Boolean) {
@@ -79,13 +85,16 @@ class MainActivity : AppCompatActivity(), PermissionsFragment.Callback {
     }
 
     private fun startApp() {
-        val fragment = if (!permissionsAllGranted()) {
-            PermissionsFragment.newInstance()
-        } else {
-            MainFragment.newInstance()
-        }
-        supportFragmentManager.beginTransaction()
-                .add(R.id.fragmentContainerView, fragment)
-                .commit()
+        supportFragmentManager.beginTransaction().apply {
+            if (!permissionsAllGranted()) {
+                add(R.id.fragmentContainerView, PermissionsFragment.newInstance())
+            } else {
+                add(R.id.fragmentContainerView, MainFragment.newInstance(), FRAGMENT_MAP)
+            }
+        }.commit()
+    }
+
+    companion object {
+        private const val FRAGMENT_MAP = "map"
     }
 }
