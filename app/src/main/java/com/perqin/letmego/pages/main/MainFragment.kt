@@ -26,6 +26,7 @@ import androidx.lifecycle.Observer
 import com.perqin.letmego.R
 import com.perqin.letmego.data.place.Place
 import com.perqin.letmego.services.TrackingService
+import com.perqin.letmego.ui.destinationlist.DestinationListFragment
 import com.perqin.letmego.utils.TencentMapGestureAdapter
 import com.perqin.letmego.utils.createBitmapFromDrawableRes
 import com.tencent.tencentmap.mapsdk.maps.CameraUpdateFactory
@@ -193,6 +194,9 @@ class MainFragment : Fragment() {
 
         mapCameraModeFab.setOnClickListener {
             viewModel.rotateMapCameraMode()
+        }
+        favoriteListFab.setOnClickListener {
+            DestinationListFragment.newInstance().show(requireActivity().supportFragmentManager, null)
         }
         favoriteImageButton.setOnClickListener {
             viewModel.toggleFavoriteForDetailedPlace()

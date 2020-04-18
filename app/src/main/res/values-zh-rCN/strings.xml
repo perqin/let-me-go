@@ -19,4 +19,5 @@
     <string name="label_accept">接受</string>
     <string name="label_exit">退出</string>
     <string name="richText_privacyPolicyMessage">使用本应用之前，您需要详细阅读并同意本应用的&lt;a href="%s">《隐私政策》&lt;/a>。点击“接受”代表您已经阅读并接受了本应用的隐私政策。</string>
+    <string name="cd_openFavoriteList">Open favorite list</string>
 </resources>

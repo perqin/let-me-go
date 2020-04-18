@@ -81,15 +81,39 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/favoriteListFab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_gravity="bottom|end"
+        android:src="@drawable/ic_baseline_playlist_add_check_24"
+        android:contentDescription="@string/cd_openFavoriteList" />
+
+    <View
+        android:id="@+id/spacerView"
+        android:layout_width="56dp"
+        android:layout_height="16dp"
+        android:layout_gravity="center_horizontal|top"
+        android:background="@color/colorAccent"
+        android:visibility="invisible"
+        app:layout_anchor="@id/favoriteListFab"
+        app:layout_anchorGravity="center_horizontal|top"
+        tools:visibility="visible" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/mapCameraModeFab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_gravity="center_horizontal|top"
         android:src="@drawable/ic_my_location_black_24dp"
         android:tint="@color/tint_inactivate"
         android:backgroundTint="@android:color/white"
         android:contentDescription="@string/cd_toggleCameraMode"
-        app:borderWidth="0dp" />
+        app:borderWidth="0dp"
+        app:layout_anchor="@id/spacerView"
+        app:layout_anchorGravity="center_horizontal|top" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
