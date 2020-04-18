@@ -3,6 +3,7 @@ package com.perqin.letmego.pages.main
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
+import android.app.SearchManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -13,9 +14,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import android.widget.SearchView
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -63,6 +63,7 @@ class MainFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
         // Ensure that the SupportMapFragment is instantiated correctly
         childFragmentManager.fragmentFactory = object : FragmentFactory() {
             override fun instantiate(classLoader: ClassLoader, className: String): Fragment {
@@ -262,6 +263,17 @@ class MainFragment : Fragment() {
         viewModel.activityDestroy()
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.action_map, menu)
+        // Associate searchable configuration with the SearchView
+        val searchManager = requireContext().getSystemService(Context.SEARCH_SERVICE) as SearchManager
+        (menu.findItem(R.id.searchItem).actionView as SearchView).apply {
+            setSearchableInfo(searchManager.getSearchableInfo(requireActivity().componentName))
+            isQueryRefinementEnabled = true
+        }
+    }
+
     private fun showDetail(title: String, address: String) {
         placeTitleTextView.text = title
         placeAddressTextView.text = address
@@ -340,6 +352,10 @@ class MainFragment : Fragment() {
 
     fun selectDestination(destination: Destination) {
         viewModel.selectPlace(destination.latitude, destination.longitude, destination.displayName)
+    }
+
+    fun searchDestination(query: String) {
+        viewModel.searchDestination(query)
     }
 
     companion object {

@@ -210,6 +210,24 @@ class MainFragmentViewModel(application: Application) : AndroidViewModel(applica
         _cameraMode.value = MapCameraMode.FREE
     }
 
+    fun searchDestination(query: String) {
+        val place = myLocation.value?:Place(40.22077, 116.23128)
+        viewModelScope.launch {
+            try {
+                val resultPlace = withContext(Dispatchers.IO) {
+                    TencentLbsApi.searchPlace(query, place.latitude, place.longitude)
+                }
+                if (resultPlace == null) {
+                    Toast.makeText(getApplication(), R.string.text_destinationNotFound, Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+                selectPlace(resultPlace.latitude, resultPlace.longitude, resultPlace.suggestedName)
+            } catch (e: Exception) {
+                Toast.makeText(getApplication(), R.string.text_failToOperate, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     enum class MapCameraMode { AUTO, FREE, CENTER_MY_LOCATION, CENTER_TERMINALS }
 
     data class CameraStatus(

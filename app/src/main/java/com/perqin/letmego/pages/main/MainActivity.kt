@@ -1,5 +1,6 @@
 package com.perqin.letmego.pages.main
 
+import android.app.SearchManager
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -30,6 +31,13 @@ class MainActivity : AppCompatActivity(), PermissionsFragment.Callback, Destinat
         }
 
         startApp()
+
+        handleSearchIfNeeded(intent)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        handleSearchIfNeeded(intent)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -58,6 +66,13 @@ class MainActivity : AppCompatActivity(), PermissionsFragment.Callback, Destinat
 
     override fun onSelectDestination(destination: Destination) {
         (supportFragmentManager.findFragmentByTag(FRAGMENT_MAP) as? MainFragment)?.selectDestination(destination)
+    }
+
+    private fun handleSearchIfNeeded(intent: Intent?) {
+        if (intent?.action == Intent.ACTION_SEARCH) {
+            val query = intent.getStringExtra(SearchManager.QUERY)?:return
+            (supportFragmentManager.findFragmentByTag(FRAGMENT_MAP) as?MainFragment)?.searchDestination(query)
+        }
     }
 
     private fun showPrivacyPolicy(requireAcceptance: Boolean) {

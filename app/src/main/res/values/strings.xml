@@ -32,4 +32,7 @@
     <string name="label_cancel">Cancel</string>
     <string name="label_destinationId">Destination ID</string>
     <string name="label_remark">Remark</string>
+    <string name="text_inputDestination">Input destination</string>
+    <string name="label_searchDestination">Search destination</string>
+    <string name="text_destinationNotFound">Destination not found</string>
 </resources>
