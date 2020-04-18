@@ -11,7 +11,7 @@ import com.perqin.letmego.data.room.appDatabase
  * Created by perqinxie on 2018/07/20.
  */
 object DestinationRepo {
-    val dao = appDatabase.destinationDao()
+    private val dao = appDatabase.destinationDao()
 
     fun isDestinationExisting(place: Place): LiveData<Boolean> {
         return Transformations.map(dao.countLiveDestination(place.latitude, place.longitude)) {
@@ -19,9 +19,10 @@ object DestinationRepo {
         }
     }
 
-    suspend fun add(place: Place) {
+    suspend fun add(place: Place, address: String) {
         val displayName = place.suggestedName?:App.context.getString(R.string.point_on_map)
-        dao.add(Destination(null, place.latitude, place.longitude, displayName))
+        dao.add(Destination(null, place.latitude, place.longitude,
+                Destination.COORDINATE_TENCENT, displayName, address))
     }
 
     suspend fun remove(place: Place) {
@@ -31,7 +32,8 @@ object DestinationRepo {
     fun getAllLiveDestinations() = dao.getAllLiveDestinations()
 
     suspend fun updateRemarkOfDestination(destination: Destination, newRemark: String) {
-        dao.updateRemarkOfDestination(Destination(destination.id, destination.latitude, destination.longitude, newRemark))
+        dao.updateRemarkOfDestination(Destination(destination.id, destination.latitude, destination.longitude,
+                Destination.COORDINATE_TENCENT, newRemark, destination.address))
     }
 
     suspend fun deleteDestination(destination: Destination) {

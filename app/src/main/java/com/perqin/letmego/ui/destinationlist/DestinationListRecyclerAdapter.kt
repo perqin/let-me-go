@@ -41,8 +41,7 @@ class DestinationListRecyclerAdapter : RecyclerView.Adapter<DestinationListRecyc
         val context = holder.itemView.context
         val destination = destinations[position]
         holder.remarkTextView.text = destination.displayName
-        // TODO: Save location
-        holder.locationTextView.text = destination.displayName
+        holder.addressTextView.text = destination.address
         holder.itemView.setOnClickListener {
             onDestinationClickListener?.invoke(destination)
         }
@@ -86,7 +85,7 @@ class DestinationListRecyclerAdapter : RecyclerView.Adapter<DestinationListRecyc
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val remarkTextView: TextView = itemView.remarkTextView
-        val locationTextView: TextView = itemView.locationTextView
+        val addressTextView: TextView = itemView.addressTextView
         val menuButton: ImageButton = itemView.menuButton
     }
 }

@@ -23,14 +23,14 @@
         android:lines="1"
         app:layout_constraintVertical_chainStyle="packed"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/locationTextView"
+        app:layout_constraintBottom_toTopOf="@id/addressTextView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/menuButton"
         tools:text="地图上的点" />
 
     <TextView
         style="@style/TextAppearance.AppCompat.Caption"
-        android:id="@+id/locationTextView"
+        android:id="@+id/addressTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"

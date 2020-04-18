@@ -16,7 +16,11 @@ class Destination(
         @ColumnInfo
         var longitude: Double,
         @ColumnInfo
-        var displayName: String
+        var coordinateType: String,
+        @ColumnInfo
+        var displayName: String,
+        @ColumnInfo
+        var address: String
 ) {
     companion object {
         /**
@@ -25,5 +29,7 @@ class Destination(
          * 0.00001° is about 1.113195m on equator.
          */
         const val MINIMAL_DEGREE = 0.00001
+
+        const val COORDINATE_TENCENT = "tencent"
     }
 }

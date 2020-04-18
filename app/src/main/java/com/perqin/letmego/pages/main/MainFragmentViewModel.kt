@@ -136,13 +136,14 @@ class MainFragmentViewModel(application: Application) : AndroidViewModel(applica
 
     fun toggleFavoriteForDetailedPlace() {
         val detailedPlace = _detailedPlace.value?:return
+        val address = _detailedPlaceInfo.value?.address.orEmpty()
         viewModelScope.launch {
             val isFavorite = isFavoriteForSelectedPlace.value?:false
             try {
                 if (isFavorite) {
                     DestinationRepo.remove(detailedPlace)
                 } else {
-                    DestinationRepo.add(detailedPlace)
+                    DestinationRepo.add(detailedPlace, address)
                 }
             } catch (e: Exception) {
                 Toast.makeText(getApplication(), R.string.text_failToOperate, Toast.LENGTH_SHORT).show()
