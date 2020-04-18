@@ -21,6 +21,11 @@ android {
                 tencentLbsKey: "${rootProject.ext.release.tencentLbsKey}",
                 buglyAppId: "${rootProject.ext.release.buglyAppId}",
         ]
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ['room.schemaLocation': project.file('misc/roomSchemaExport').canonicalPath]
+            }
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -60,7 +65,7 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'androidx.appcompat:appcompat:1.2.0-beta01'
     implementation 'androidx.fragment:fragment-ktx:1.2.4'
-    implementation 'androidx.preference:preference:1.1.0'
+    implementation 'androidx.preference:preference:1.1.1'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'androidx.lifecycle:lifecycle-common-java8:2.2.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
