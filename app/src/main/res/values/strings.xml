@@ -37,4 +37,5 @@
     <string name="text_destinationNotFound">Destination not found</string>
     <string name="cd_closeSearch">Close search</string>
     <string name="cd_clearQuery">Clear query</string>
+    <string name="label_pickDestination">Pick destination</string>
 </resources>

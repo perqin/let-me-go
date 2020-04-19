@@ -18,6 +18,9 @@ interface DestinationDao {
     @Query("SELECT * FROM destination WHERE (ABS(latitude - :latitude) <= ${Destination.MINIMAL_DEGREE}) AND (ABS(longitude - :longitude) <= ${Destination.MINIMAL_DEGREE})")
     suspend fun getDestinationsAt(latitude: Double, longitude: Double): List<Destination>
 
+    @Query("SELECT * FROM destination WHERE id = :id")
+    suspend fun getDestinationById(id: Long): Destination
+
     @Insert
     suspend fun add(vararg destination: Destination)
 

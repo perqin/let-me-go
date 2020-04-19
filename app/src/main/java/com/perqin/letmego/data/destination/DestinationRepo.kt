@@ -39,4 +39,8 @@ object DestinationRepo {
     suspend fun deleteDestination(destination: Destination) {
         dao.deleteDestination(destination)
     }
+
+    suspend fun getDestinationById(destinationId: Long): Destination {
+        return dao.getDestinationById(destinationId)
+    }
 }
