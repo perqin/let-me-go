@@ -17,17 +17,18 @@ import com.perqin.letmego.data.destination.Destination
 import com.perqin.letmego.data.place.Place
 import com.perqin.letmego.data.preferences.PreferencesRepo
 import com.perqin.letmego.pages.about.AboutActivity
+import com.perqin.letmego.pages.destinationlist.DestinationListFragment
+import com.perqin.letmego.pages.main.map.MapFragment
 import com.perqin.letmego.pages.main.permissions.PermissionsFragment
 import com.perqin.letmego.pages.main.search.SearchDestinationFragment
-import com.perqin.letmego.ui.destinationlist.DestinationListFragment
 import com.perqin.letmego.utils.permissionsAllGranted
 import com.perqin.letmego.utils.privacyPolicyUrl
 
-class MainActivity : AppCompatActivity(), PermissionsFragment.Callback, MainFragment.Callback,
+class MainActivity : AppCompatActivity(), PermissionsFragment.Callback, MapFragment.Callback,
         DestinationListFragment.Callback, SearchDestinationFragment.Callback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.main_activity)
+        setContentView(R.layout.activity_main)
 
         if (!PreferencesRepo.privacyPolicyAccepted) {
             showPrivacyPolicy(true)
@@ -65,7 +66,7 @@ class MainActivity : AppCompatActivity(), PermissionsFragment.Callback, MainFrag
 
     override fun onAllPermissionsGranted() {
         supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, MainFragment.newInstance(), FRAGMENT_MAP)
+                .replace(R.id.fragmentContainerView, MapFragment.newInstance(), FRAGMENT_MAP)
                 .commit()
     }
 
@@ -77,7 +78,7 @@ class MainActivity : AppCompatActivity(), PermissionsFragment.Callback, MainFrag
     }
 
     override fun locatePlaceAndClose(place: Place) {
-        (supportFragmentManager.findFragmentByTag(FRAGMENT_MAP) as MainFragment).selectPlace(place)
+        (supportFragmentManager.findFragmentByTag(FRAGMENT_MAP) as MapFragment).selectPlace(place)
         closeSearch()
     }
 
@@ -86,13 +87,13 @@ class MainActivity : AppCompatActivity(), PermissionsFragment.Callback, MainFrag
     }
 
     override fun onSelectDestination(destination: Destination) {
-        (supportFragmentManager.findFragmentByTag(FRAGMENT_MAP) as? MainFragment)?.selectDestination(destination)
+        (supportFragmentManager.findFragmentByTag(FRAGMENT_MAP) as? MapFragment)?.selectDestination(destination)
     }
 
     private fun handleSearchIfNeeded(intent: Intent?) {
         if (intent?.action == Intent.ACTION_SEARCH) {
             val query = intent.getStringExtra(SearchManager.QUERY)?:return
-            (supportFragmentManager.findFragmentByTag(FRAGMENT_MAP) as?MainFragment)?.searchDestination(query)
+            (supportFragmentManager.findFragmentByTag(FRAGMENT_MAP) as? MapFragment)?.searchDestination(query)
         }
     }
 
@@ -125,7 +126,7 @@ class MainActivity : AppCompatActivity(), PermissionsFragment.Callback, MainFrag
             if (!permissionsAllGranted()) {
                 add(R.id.fragmentContainerView, PermissionsFragment.newInstance())
             } else {
-                add(R.id.fragmentContainerView, MainFragment.newInstance(), FRAGMENT_MAP)
+                add(R.id.fragmentContainerView, MapFragment.newInstance(), FRAGMENT_MAP)
             }
         }.commit()
     }

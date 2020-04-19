@@ -1,4 +1,4 @@
-package com.perqin.letmego.ui.destinationlist
+package com.perqin.letmego.pages.destinationlist
 
 import androidx.lifecycle.ViewModel
 import com.perqin.letmego.data.destination.Destination

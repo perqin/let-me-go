@@ -1,4 +1,4 @@
-package com.perqin.letmego.pages.main
+package com.perqin.letmego.pages.main.map
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
@@ -24,8 +24,8 @@ import androidx.lifecycle.Observer
 import com.perqin.letmego.R
 import com.perqin.letmego.data.destination.Destination
 import com.perqin.letmego.data.place.Place
+import com.perqin.letmego.pages.destinationlist.DestinationListFragment
 import com.perqin.letmego.services.TrackingService
-import com.perqin.letmego.ui.destinationlist.DestinationListFragment
 import com.perqin.letmego.utils.TencentMapGestureAdapter
 import com.perqin.letmego.utils.createBitmapFromDrawableRes
 import com.tencent.tencentmap.mapsdk.maps.CameraUpdateFactory
@@ -33,10 +33,10 @@ import com.tencent.tencentmap.mapsdk.maps.SupportMapFragment
 import com.tencent.tencentmap.mapsdk.maps.TencentMap
 import com.tencent.tencentmap.mapsdk.maps.TencentMapOptions
 import com.tencent.tencentmap.mapsdk.maps.model.*
+import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.android.synthetic.main.layout_app_bar.*
-import kotlinx.android.synthetic.main.main_fragment.*
 
-class MainFragment : Fragment() {
+class MapFragment : Fragment() {
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder) {
             trackingService = (service as TrackingService.LocalBinder).apply {
@@ -52,7 +52,7 @@ class MainFragment : Fragment() {
 
     private lateinit var tencentMap: TencentMap
     private lateinit var myLocationMarker: Marker
-    private val viewModel: MainFragmentViewModel by viewModels()
+    private val viewModel: MapFragmentViewModel by viewModels()
     private var destinationMarker: Marker? = null
     private var destinationRangeCircle: Circle? = null
     private var selectedPlaceMarker: Marker? = null
@@ -89,7 +89,7 @@ class MainFragment : Fragment() {
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?,
     ): View {
-        return inflater.inflate(R.layout.main_fragment, container, false)
+        return inflater.inflate(R.layout.fragment_map, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -167,15 +167,15 @@ class MainFragment : Fragment() {
         })
         viewModel.cameraStatus.observe(viewLifecycleOwner, Observer {
             when(it!!.mode) {
-                MainFragmentViewModel.MapCameraMode.FREE -> {
+                MapFragmentViewModel.MapCameraMode.FREE -> {
                     mapCameraModeFab.setImageResource(R.drawable.ic_my_location_black_24dp)
                     mapCameraModeFab.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.tint_inactivate))
                 }
-                MainFragmentViewModel.MapCameraMode.CENTER_MY_LOCATION -> {
+                MapFragmentViewModel.MapCameraMode.CENTER_MY_LOCATION -> {
                     mapCameraModeFab.setImageResource(R.drawable.ic_my_location_black_24dp)
                     mapCameraModeFab.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.tint_activate))
                 }
-                MainFragmentViewModel.MapCameraMode.CENTER_TERMINALS -> {
+                MapFragmentViewModel.MapCameraMode.CENTER_TERMINALS -> {
                     mapCameraModeFab.setImageResource(R.drawable.ic_center_focus_strong_black_24dp)
                     mapCameraModeFab.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.tint_activate))
                 }
@@ -235,13 +235,13 @@ class MainFragment : Fragment() {
         })
         viewModel.cameraStatus.observe(viewLifecycleOwner, Observer {
             if (!lockMapCamera) {
-                if (it.mode == MainFragmentViewModel.MapCameraMode.CENTER_MY_LOCATION && it.targets.isNotEmpty()) {
+                if (it.mode == MapFragmentViewModel.MapCameraMode.CENTER_MY_LOCATION && it.targets.isNotEmpty()) {
                     // Center it
                     tencentMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
                             LatLng(it.targets[0].latitude, it.targets[0].longitude),
                             15.0F
                     ))
-                } else if (it.mode == MainFragmentViewModel.MapCameraMode.CENTER_TERMINALS && it.targets.size > 1) {
+                } else if (it.mode == MapFragmentViewModel.MapCameraMode.CENTER_TERMINALS && it.targets.size > 1) {
                     // Zoom to include all places
                     val padding = resources.getDimensionPixelSize(R.dimen.map_camera_padding)
                     tencentMap.animateCamera(CameraUpdateFactory.newLatLngBoundsRect(
@@ -380,7 +380,7 @@ class MainFragment : Fragment() {
     }
 
     companion object {
-        fun newInstance() = MainFragment()
+        fun newInstance() = MapFragment()
         private const val Z_INDEX_DESTINATION_RANGE = 1
         private const val Z_INDEX_DESTINATION = 2F
         private const val Z_INDEX_MY_LOCATION = 10F

@@ -1,4 +1,4 @@
-package com.perqin.letmego.data.tasker
+package com.perqin.letmego.receiver
 
 import android.content.Context
 import android.os.Bundle

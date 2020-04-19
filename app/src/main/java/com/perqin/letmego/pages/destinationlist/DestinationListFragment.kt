@@ -1,4 +1,4 @@
-package com.perqin.letmego.ui.destinationlist
+package com.perqin.letmego.pages.destinationlist
 
 import android.app.Dialog
 import android.content.Context
@@ -18,7 +18,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.perqin.letmego.R
 import com.perqin.letmego.data.destination.Destination
-import kotlinx.android.synthetic.main.destination_list_fragment.*
+import kotlinx.android.synthetic.main.fragment_destination_list.*
 import kotlinx.coroutines.launch
 
 class DestinationListFragment : BottomSheetDialogFragment() {
@@ -79,7 +79,7 @@ class DestinationListFragment : BottomSheetDialogFragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.destination_list_fragment, container, false)
+        return inflater.inflate(R.layout.fragment_destination_list, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

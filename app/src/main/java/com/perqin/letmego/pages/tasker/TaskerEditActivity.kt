@@ -6,15 +6,15 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.perqin.letmego.R
 import com.perqin.letmego.data.destination.Destination
-import com.perqin.letmego.data.tasker.TaskerReceiver
-import com.perqin.letmego.ui.destinationlist.DestinationListFragment
+import com.perqin.letmego.pages.destinationlist.DestinationListFragment
+import com.perqin.letmego.receiver.TaskerReceiver
 import kotlinx.android.synthetic.main.layout_app_bar.*
 import com.twofortyfouram.locale.api.Intent as TaskerIntent
 
 class TaskerEditActivity : AppCompatActivity(), DestinationListFragment.Callback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_edit_activity)
+        setContentView(R.layout.activity_tasker_edit)
 
         setSupportActionBar(toolbar)
 

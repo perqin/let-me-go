@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.destinationlist.DestinationListFragment">
+    tools:context=".pages.destinationlist.DestinationListFragment">
 
     <TextView
         style="@style/TextAppearance.AppCompat.Subhead"
@@ -40,7 +40,7 @@
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:listitem="@layout/destination_list_item" />
+            tools:listitem="@layout/item_destination_list" />
 
     </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

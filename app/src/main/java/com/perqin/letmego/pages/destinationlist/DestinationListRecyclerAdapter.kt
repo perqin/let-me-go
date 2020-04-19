@@ -1,4 +1,4 @@
-package com.perqin.letmego.ui.destinationlist
+package com.perqin.letmego.pages.destinationlist
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -13,8 +13,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import com.perqin.letmego.R
 import com.perqin.letmego.data.destination.Destination
-import kotlinx.android.synthetic.main.destination_list_item.view.*
 import kotlinx.android.synthetic.main.dialog_edit_remark.view.*
+import kotlinx.android.synthetic.main.item_destination_list.view.*
 
 /**
  * Created on 7/21/18.
@@ -32,7 +32,7 @@ class DestinationListRecyclerAdapter : RecyclerView.Adapter<DestinationListRecyc
         }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.destination_list_item, parent, false))
+        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_destination_list, parent, false))
     }
 
     override fun getItemCount() = destinations.size

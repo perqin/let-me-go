@@ -1,4 +1,4 @@
-package com.perqin.letmego.pages.main
+package com.perqin.letmego.pages.main.map
 
 import android.app.Application
 import android.widget.Toast
@@ -16,7 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class MainFragmentViewModel(application: Application) : AndroidViewModel(application) {
+class MapFragmentViewModel(application: Application) : AndroidViewModel(application) {
     private val myLocationFromLocator: LiveData<Place> = Transformations.map(TencentLocator.getLocation()) {
         Place(it.latitude, it.longitude)
     }
@@ -44,11 +44,11 @@ class MainFragmentViewModel(application: Application) : AndroidViewModel(applica
         private var destination: Place? = null
 
         init {
-            addSource(this@MainFragmentViewModel.destination) {
+            addSource(this@MapFragmentViewModel.destination) {
                 this.destination = it
                 updateValue()
             }
-            addSource(this@MainFragmentViewModel._selectedPlace) {
+            addSource(this@MapFragmentViewModel._selectedPlace) {
                 this.userSelectedPlace = it
                 updateValue()
             }
@@ -74,11 +74,11 @@ class MainFragmentViewModel(application: Application) : AndroidViewModel(applica
         private var destination: Place? = null
 
         init {
-            this@MainFragmentViewModel._detailedPlace.observeForever {
+            this@MapFragmentViewModel._detailedPlace.observeForever {
                 this.detailedPlace = it
                 updateValue()
             }
-            this@MainFragmentViewModel.destination.observeForever {
+            this@MapFragmentViewModel.destination.observeForever {
                 this.destination = it
                 updateValue()
             }
