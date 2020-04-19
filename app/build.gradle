@@ -62,7 +62,7 @@ android {
 }
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation fileTree(include: ['TencentLocationSdk_v6.2.5.3_r15b3b3cc_20171103_115903.jar'], dir: 'libs')
     implementation 'androidx.appcompat:appcompat:1.2.0-beta01'
     implementation 'androidx.fragment:fragment-ktx:1.2.4'
     implementation 'androidx.preference:preference:1.1.1'

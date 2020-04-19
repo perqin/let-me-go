@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <Preference
+        android:key="about_version"
+        android:title="@string/app_name"
+        tools:summary="1.0.0" />
+
+    <PreferenceCategory
+        android:title="@string/label_developer">
+
+        <Preference
+            android:title="@string/author_name"
+            android:summary="@string/author_signature">
+
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="https://perqin.github.io" />
+
+        </Preference>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/label_openSourceCredits">
+
+        <Preference
+            android:title="Android Jetpack"
+            android:summary="Google">
+
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="https://developer.android.com/jetpack" />
+
+        </Preference>
+
+        <Preference
+            android:title="android-plugin-client-sdk-for-locale"
+            android:summary="two forty four a.m.">
+
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="https://github.com/twofortyfouram/android-plugin-client-sdk-for-locale" />
+
+        </Preference>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

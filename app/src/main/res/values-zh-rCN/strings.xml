@@ -39,4 +39,7 @@
     <string name="cd_closeSearch">关闭搜索</string>
     <string name="cd_clearQuery">清空搜索文字</string>
     <string name="label_pickDestination">选择目的地</string>
+    <string name="label_developer">开发者</string>
+    <string name="author_signature">我永远喜欢雪之下雪乃。</string>
+    <string name="label_openSourceCredits">开源致谢</string>
 </resources>

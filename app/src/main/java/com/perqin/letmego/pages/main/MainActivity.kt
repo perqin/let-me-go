@@ -16,6 +16,7 @@ import com.perqin.letmego.R
 import com.perqin.letmego.data.destination.Destination
 import com.perqin.letmego.data.place.Place
 import com.perqin.letmego.data.preferences.PreferencesRepo
+import com.perqin.letmego.pages.about.AboutActivity
 import com.perqin.letmego.pages.main.permissions.PermissionsFragment
 import com.perqin.letmego.pages.main.search.SearchDestinationFragment
 import com.perqin.letmego.ui.destinationlist.DestinationListFragment
@@ -55,6 +56,7 @@ class MainActivity : AppCompatActivity(), PermissionsFragment.Callback, MainFrag
                 true
             }
             R.id.aboutItem -> {
+                startActivity(Intent(this, AboutActivity::class.java))
                 true
             }
             else -> super.onOptionsItemSelected(item)

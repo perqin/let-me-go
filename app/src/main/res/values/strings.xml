@@ -38,4 +38,8 @@
     <string name="cd_closeSearch">Close search</string>
     <string name="cd_clearQuery">Clear query</string>
     <string name="label_pickDestination">Pick destination</string>
+    <string name="label_developer">Developer</string>
+    <string name="author_name" translatable="false">Perqin</string>
+    <string name="author_signature">I like Yukino Yukinoshi forever.</string>
+    <string name="label_openSourceCredits">Open source credits</string>
 </resources>

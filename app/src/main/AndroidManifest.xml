@@ -85,6 +85,10 @@
         </activity>
 
         <activity
+            android:name=".pages.about.AboutActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity
             android:name=".pages.tasker.TaskerEditActivity"
             android:theme="@style/AppTheme.NoActionBar"
             android:icon="@mipmap/ic_launcher"
