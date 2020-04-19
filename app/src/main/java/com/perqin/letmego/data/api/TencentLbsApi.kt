@@ -6,6 +6,7 @@ import com.perqin.letmego.BuildConfig
 import com.perqin.letmego.R
 import com.perqin.letmego.data.place.Place
 import com.perqin.letmego.data.placeinfo.PlaceInfo
+import com.perqin.letmego.pages.main.search.Suggestion
 import org.json.JSONObject
 import java.net.URL
 
@@ -49,5 +50,39 @@ object TencentLbsApi {
         val resultLongitude = data.getJSONObject("location").getDouble("lng")
         val title = data.getString("title")
         return Place(resultLatitude, resultLongitude, title)
+    }
+
+    fun getCurrentCity(latitude: Double, longitude: Double): String {
+        val json = URL("$baseUrl/geocoder/v1/?location=${latitude},${longitude}&key=$key").readText()
+        val obj = JSONObject(json)
+        val status = obj.getInt("status")
+        val message = obj.getString("message")
+        if (status != 0) {
+            throw RuntimeException("Tencent LBS API: status = $status, message = $message")
+        }
+        return obj.getJSONObject("result").getJSONObject("ad_info").getString("city")
+    }
+
+    fun getSuggestions(query: String, city: String): List<Suggestion> {
+        val uri = Uri.parse("$baseUrl/place/v1/suggestion?key=$key").buildUpon()
+                .appendQueryParameter("keyword", query)
+                .appendQueryParameter("region", city)
+                .build()
+        val json = URL(uri.toString()).readText()
+        val obj = JSONObject(json)
+        val status = obj.getInt("status")
+        val message = obj.getString("message")
+        if (status != 0) {
+            throw RuntimeException("Tencent LBS API: status = $status, message = $message")
+        }
+        val list = obj.getJSONArray("data")
+        val suggestions = mutableListOf<Suggestion>()
+        for (i in 0 until list.length()) {
+            val item = list.getJSONObject(i)
+            suggestions.add(Suggestion(item.getString("title"),
+                    item.getJSONObject("location").getDouble("lat"),
+                    item.getJSONObject("location").getDouble("lng")))
+        }
+        return suggestions
     }
 }

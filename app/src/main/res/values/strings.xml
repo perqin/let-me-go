@@ -35,4 +35,6 @@
     <string name="text_inputDestination">Input destination</string>
     <string name="label_searchDestination">Search destination</string>
     <string name="text_destinationNotFound">Destination not found</string>
+    <string name="cd_closeSearch">Close search</string>
+    <string name="cd_clearQuery">Clear query</string>
 </resources>

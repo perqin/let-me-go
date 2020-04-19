@@ -3,7 +3,6 @@ package com.perqin.letmego.pages.main
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
-import android.app.SearchManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -15,7 +14,6 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.view.*
-import android.widget.SearchView
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -60,6 +58,17 @@ class MainFragment : Fragment() {
     private var selectedPlaceMarker: Marker? = null
     private var lockMapCamera = false
     private val mapOnClickBlocker = DelayBlocker()
+    private var callback: Callback? = null
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        callback = context as Callback
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        callback = null
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -266,11 +275,15 @@ class MainFragment : Fragment() {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.action_map, menu)
-        // Associate searchable configuration with the SearchView
-        val searchManager = requireContext().getSystemService(Context.SEARCH_SERVICE) as SearchManager
-        (menu.findItem(R.id.searchItem).actionView as SearchView).apply {
-            setSearchableInfo(searchManager.getSearchableInfo(requireActivity().componentName))
-            isQueryRefinementEnabled = true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.searchItem -> {
+                callback?.openDestinationSearch()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
@@ -354,8 +367,16 @@ class MainFragment : Fragment() {
         viewModel.selectPlace(destination.latitude, destination.longitude, destination.displayName)
     }
 
+    fun selectPlace(place: Place) {
+        viewModel.selectPlace(place.latitude, place.longitude, place.suggestedName)
+    }
+
     fun searchDestination(query: String) {
         viewModel.searchDestination(query)
+    }
+
+    interface Callback {
+        fun openDestinationSearch()
     }
 
     companion object {

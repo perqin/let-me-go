@@ -11,16 +11,19 @@ import com.tencent.map.geolocation.TencentLocationRequest
  * Created by perqin on 2018/07/28.
  */
 object TencentLocator {
+    var lastLocation: TencentLocation? = null
+        private set
     private var listeners = emptyList<OnLocationUpdateListener>()
     private val tencentLocationListener = object : TencentLocationListener {
         override fun onStatusUpdate(p0: String?, p1: Int, p2: String?) {
             // TODO: Notify user to enable GPS if needed
         }
 
-        override fun onLocationChanged(location: TencentLocation?, error: Int, reason: String?) {
+        override fun onLocationChanged(location: TencentLocation, error: Int, reason: String?) {
             if (TencentLocation.ERROR_OK == error) {
+                lastLocation = location
                 listeners.forEach {
-                    it.onLocationUpdate(location!!)
+                    it.onLocationUpdate(location)
                 }
             }
         }

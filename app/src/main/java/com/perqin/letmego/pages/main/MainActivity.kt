@@ -14,13 +14,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
 import com.perqin.letmego.R
 import com.perqin.letmego.data.destination.Destination
+import com.perqin.letmego.data.place.Place
 import com.perqin.letmego.data.preferences.PreferencesRepo
 import com.perqin.letmego.pages.main.permissions.PermissionsFragment
+import com.perqin.letmego.pages.main.search.SearchDestinationFragment
 import com.perqin.letmego.ui.destinationlist.DestinationListFragment
 import com.perqin.letmego.utils.permissionsAllGranted
 import com.perqin.letmego.utils.privacyPolicyUrl
 
-class MainActivity : AppCompatActivity(), PermissionsFragment.Callback, DestinationListFragment.Callback {
+class MainActivity : AppCompatActivity(), PermissionsFragment.Callback, MainFragment.Callback,
+        DestinationListFragment.Callback, SearchDestinationFragment.Callback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
@@ -62,6 +65,22 @@ class MainActivity : AppCompatActivity(), PermissionsFragment.Callback, Destinat
         supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainerView, MainFragment.newInstance(), FRAGMENT_MAP)
                 .commit()
+    }
+
+    override fun openDestinationSearch() {
+        supportFragmentManager.beginTransaction()
+                .add(R.id.fragmentContainerView, SearchDestinationFragment.newInstance())
+                .addToBackStack(null)
+                .commit()
+    }
+
+    override fun locatePlaceAndClose(place: Place) {
+        (supportFragmentManager.findFragmentByTag(FRAGMENT_MAP) as MainFragment).selectPlace(place)
+        closeSearch()
+    }
+
+    override fun closeSearch() {
+        supportFragmentManager.popBackStack()
     }
 
     override fun onSelectDestination(destination: Destination) {
